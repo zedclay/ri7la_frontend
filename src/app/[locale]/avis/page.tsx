@@ -1,0 +1,69 @@
+import type { Metadata } from "next";
+import { PublicFooter } from "@/components/layout/PublicFooter";
+import { PublicHeader } from "@/components/layout/PublicHeader";
+import { mockReviews } from "@/lib/mockData";
+import { MaterialIcon } from "@/components/ui/MaterialIcon";
+
+export const metadata: Metadata = {
+  title: "Avis — Ri7la",
+  description: "Avis et retours des voyageurs Ri7la (MVP).",
+};
+
+function Stars({ rating }: { rating: number }) {
+  return (
+    <div className="flex items-center gap-0.5 text-tertiary">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <MaterialIcon
+          key={i}
+          name="star"
+          filled={i <= rating}
+          className="!text-sm"
+        />
+      ))}
+    </div>
+  );
+}
+
+export default function ReviewsPage() {
+  return (
+    <div className="flex min-h-screen flex-col bg-surface">
+      <PublicHeader />
+      <main className="mx-auto w-full max-w-5xl flex-1 px-6 pb-20 pt-28 md:px-8 md:pt-32">
+        <h1 className="mb-2 font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+          Avis voyageurs
+        </h1>
+        <p className="mb-10 max-w-2xl text-on-surface-variant">
+          Les retours des passagers et conducteurs renforcent la confiance et améliorent la qualité
+          du service.
+        </p>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {mockReviews.map((r) => (
+            <div
+              key={r.id}
+              className="rounded-2xl bg-surface-container-lowest p-6 shadow-sm"
+            >
+              <div className="mb-3 flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary-container text-xs font-bold text-on-secondary-fixed-variant">
+                  {r.authorName.slice(0, 1).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-bold text-on-surface">{r.authorName}</div>
+                  <div className="text-[10px] font-medium text-on-surface-variant">
+                    {r.createdAtLabel}
+                  </div>
+                </div>
+                <div className="ml-auto">
+                  <Stars rating={r.rating} />
+                </div>
+              </div>
+              <p className="text-sm italic text-on-surface-variant">{r.comment}</p>
+            </div>
+          ))}
+        </div>
+      </main>
+      <PublicFooter />
+    </div>
+  );
+}
+

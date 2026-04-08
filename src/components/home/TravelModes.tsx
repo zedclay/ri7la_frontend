@@ -1,73 +1,110 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
+import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
-export function TravelModes() {
+const IMG_CARPOOL =
+  "https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=1400&q=80";
+
+const IMG_BUS =
+  "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1400&q=80";
+
+const IMG_TRAIN =
+  "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1400&q=80";
+
+export async function TravelModes() {
+  const t = await getTranslations("common");
+
   return (
-    <section className="bg-background py-16 sm:py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <h2 className="text-center font-serif text-3xl font-semibold text-foreground sm:text-4xl">
-          Choisissez votre mode de voyage
+    <section className="bg-surface px-6 py-24">
+      <div className="mx-auto max-w-7xl">
+        <h2 className="mb-12 text-center font-headline text-3xl font-bold text-on-surface md:text-4xl">
+          {t("travelModesTitle")}
         </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-muted">
-          Économisez en covoiturage ou voyagez au confort en bus — le choix est à vous.
-        </p>
-
-        <div className="mt-12 grid gap-6 md:grid-cols-2">
-          <article className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
-            <div className="relative aspect-[16/10]">
+        <div className="grid gap-8 md:grid-cols-3">
+          <article className="subtle-shadow group overflow-hidden rounded-xl bg-surface-container-lowest">
+            <div className="relative h-64 overflow-hidden">
               <Image
-                src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=900&q=80"
-                alt="Covoiturage"
+                src={IMG_CARPOOL}
+                alt={t("modeCarpoolTitle")}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
-              <span className="absolute left-4 top-4 rounded-full bg-card/95 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary shadow-sm">
-                Économique
-              </span>
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent" />
+              <div className="absolute bottom-6 start-6 text-white">
+                <span className="mb-2 inline-block rounded-full bg-tertiary-fixed px-3 py-1 text-xs font-bold uppercase tracking-widest text-on-tertiary-fixed">
+                  {t("tagEconomical")}
+                </span>
+                <h3 className="font-headline text-2xl font-bold">{t("modeCarpoolTitle")}</h3>
+              </div>
             </div>
-            <div className="p-6">
-              <h3 className="font-serif text-xl font-semibold text-foreground">Covoiturage</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">
-                Partagez les frais avec des conducteurs vérifiés sur des trajets qui vous
-                ressemblent.
-              </p>
+            <div className="p-8">
+              <p className="mb-8 leading-relaxed text-on-surface-variant">{t("modeCarpoolBody")}</p>
               <Link
                 href="/search?mode=carpool"
-                className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+                className="flex items-center gap-2 font-bold text-primary transition-all hover:gap-4"
               >
-                Trouver un covoiturage
-                <span aria-hidden>→</span>
+                {t("modeCarpoolCta")}
+                <MaterialIcon name="chevron_right" className="!text-xl rtl:rotate-180" />
               </Link>
             </div>
           </article>
 
-          <article className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
-            <div className="relative aspect-[16/10]">
+          <article className="subtle-shadow group overflow-hidden rounded-xl bg-surface-container-lowest">
+            <div className="relative h-64 overflow-hidden">
               <Image
-                src="https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=900&q=80"
-                alt="Bus"
+                src={IMG_BUS}
+                alt={t("modeBusTitle")}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
-              <span className="absolute left-4 top-4 rounded-full bg-card/95 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary shadow-sm">
-                Confortable
-              </span>
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent" />
+              <div className="absolute bottom-6 start-6 text-white">
+                <span className="mb-2 inline-block rounded-full bg-primary-fixed px-3 py-1 text-xs font-bold uppercase tracking-widest text-on-primary-fixed-variant">
+                  {t("tagComfort")}
+                </span>
+                <h3 className="font-headline text-2xl font-bold">{t("modeBusTitle")}</h3>
+              </div>
             </div>
-            <div className="p-6">
-              <h3 className="font-serif text-xl font-semibold text-foreground">
-                Réservation de bus
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">
-                Sièges attribués, horaires clairs et partenaires autocaristes de confiance.
-              </p>
+            <div className="p-8">
+              <p className="mb-8 leading-relaxed text-on-surface-variant">{t("modeBusBody")}</p>
               <Link
                 href="/search?mode=bus"
-                className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+                className="flex items-center gap-2 font-bold text-primary transition-all hover:gap-4"
               >
-                Consulter les horaires
-                <span aria-hidden>→</span>
+                {t("modeBusCta")}
+                <MaterialIcon name="chevron_right" className="!text-xl rtl:rotate-180" />
+              </Link>
+            </div>
+          </article>
+
+          <article className="subtle-shadow group overflow-hidden rounded-xl bg-surface-container-lowest">
+            <div className="relative h-64 overflow-hidden">
+              <Image
+                src={IMG_TRAIN}
+                alt={t("modeTrainTitle")}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent" />
+              <div className="absolute bottom-6 start-6 text-white">
+                <span className="mb-2 inline-block rounded-full bg-secondary-container px-3 py-1 text-xs font-bold uppercase tracking-widest text-on-secondary-fixed-variant">
+                  {t("tagOfficial")}
+                </span>
+                <h3 className="font-headline text-2xl font-bold">{t("modeTrainTitle")}</h3>
+              </div>
+            </div>
+            <div className="p-8">
+              <p className="mb-8 leading-relaxed text-on-surface-variant">{t("modeTrainBody")}</p>
+              <Link
+                href="/search?mode=train"
+                className="flex items-center gap-2 font-bold text-primary transition-all hover:gap-4"
+              >
+                {t("modeTrainCta")}
+                <MaterialIcon name="chevron_right" className="!text-xl rtl:rotate-180" />
               </Link>
             </div>
           </article>

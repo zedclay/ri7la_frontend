@@ -1,65 +1,113 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
+import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { getPlaceByCityKey, placePrimaryLabel } from "@/lib/algeriaPlaces";
 
-const routes = [
-  { from: "Alger", to: "Oran", price: "1 200 DA", carpool: true, bus: true },
-  { from: "Alger", to: "Constantine", price: "1 500 DA", carpool: true, bus: true },
-  { from: "Oran", to: "Tlemcen", price: "900 DA", carpool: true, bus: false },
-];
+export async function PopularRoutes() {
+  const t = await getTranslations("common");
+  const locale = await getLocale();
 
-export function PopularRoutes() {
+  const routes: {
+    fromKey: string;
+    toKey: string;
+    duration: string;
+    price: string;
+    carpool: boolean;
+    bus: boolean;
+  }[] = [
+    {
+      fromKey: "Algiers",
+      toKey: "Oran",
+      duration: t("routeDur1"),
+      price: "1 200 DA",
+      carpool: true,
+      bus: true,
+    },
+    {
+      fromKey: "Algiers",
+      toKey: "Constantine",
+      duration: t("routeDur2"),
+      price: "1 500 DA",
+      carpool: true,
+      bus: true,
+    },
+    {
+      fromKey: "Oran",
+      toKey: "Tlemcen",
+      duration: t("routeDur3"),
+      price: "800 DA",
+      carpool: true,
+      bus: false,
+    },
+  ];
+
+  function lineLabel(fromKey: string, toKey: string) {
+    const a = getPlaceByCityKey(fromKey);
+    const b = getPlaceByCityKey(toKey);
+    const from = a ? placePrimaryLabel(a, locale) : fromKey;
+    const to = b ? placePrimaryLabel(b, locale) : toKey;
+    return { from, to, title: `${from} → ${to}` };
+  }
+
   return (
-    <section className="bg-background py-16 sm:py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+    <section className="bg-surface px-6 py-24">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <h2 className="font-serif text-3xl font-semibold text-foreground sm:text-4xl">
-              Trajets populaires
+            <h2 className="mb-2 font-headline text-3xl font-bold text-on-surface md:text-4xl">
+              {t("popularTitle")}
             </h2>
-            <p className="mt-2 text-muted">À partir des meilleurs tarifs constatés.</p>
+            <p className="text-on-surface-variant">{t("popularSubtitle")}</p>
           </div>
           <Link
             href="/search"
-            className="text-sm font-semibold text-primary hover:underline"
+            className="hidden items-center gap-2 font-bold text-primary md:flex"
           >
-            Voir tout →
+            {t("seeAll")}
+            <MaterialIcon name="arrow_forward" className="!text-xl rtl:rotate-180" />
           </Link>
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {routes.map((r) => (
-            <Link
-              key={`${r.from}-${r.to}`}
-              href={`/search?from=${encodeURIComponent(r.from)}&to=${encodeURIComponent(r.to)}`}
-              className="group rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-semibold text-foreground">
-                    {r.from} <span className="text-muted">→</span> {r.to}
-                  </p>
-                  <p className="mt-2 text-2xl font-bold text-primary">{r.price}</p>
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {routes.map((r) => {
+            const { title } = lineLabel(r.fromKey, r.toKey);
+            return (
+              <Link
+                key={`${r.fromKey}-${r.toKey}`}
+                href={`/search?from=${encodeURIComponent(r.fromKey)}&to=${encodeURIComponent(r.toKey)}`}
+                className="cursor-pointer rounded-xl bg-surface-container-low p-6 transition-colors hover:bg-surface-container-high"
+              >
+                <div className="mb-6 flex items-start justify-between">
+                  <div className="space-y-1">
+                    <h5 className="font-headline text-lg font-bold text-on-surface">{title}</h5>
+                    <p className="text-xs font-semibold tracking-wider text-outline">
+                      {t("durationApprox", { duration: r.duration })}
+                    </p>
+                  </div>
+                  <div className="text-end">
+                    <span className="block text-xs font-medium text-on-surface-variant">
+                      {t("fromPrice")}
+                    </span>
+                    <span className="text-xl font-bold text-primary">{r.price}</span>
+                  </div>
                 </div>
-                <div className="flex gap-1.5">
+                <div className="flex gap-2">
                   {r.carpool && (
-                    <span
-                      className="rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
-                      title="Covoiturage disponible"
-                    >
-                      Covoit
+                    <span className="flex items-center gap-1 rounded-full bg-surface-container-lowest px-3 py-1 text-xs font-semibold text-on-surface">
+                      <MaterialIcon name="directions_car" className="!text-sm" />
+                      {t("carpoolShort")}
                     </span>
                   )}
                   {r.bus && (
-                    <span
-                      className="rounded-md bg-amber-500/15 px-2 py-1 text-xs font-medium text-amber-800"
-                      title="Bus disponible"
-                    >
-                      Bus
+                    <span className="flex items-center gap-1 rounded-full bg-surface-container-lowest px-3 py-1 text-xs font-semibold text-on-surface">
+                      <MaterialIcon name="directions_bus" className="!text-sm" />
+                      {t("bus")}
                     </span>
                   )}
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>

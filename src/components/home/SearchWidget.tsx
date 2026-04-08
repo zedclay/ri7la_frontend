@@ -1,26 +1,38 @@
 "use client";
 
+import { useRouter } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { StationAutocomplete } from "@/components/search/StationAutocomplete";
+import { resolveCityKeyFromParam } from "@/lib/algeriaPlaces";
 
-type Mode = "all" | "carpool" | "bus";
-
-const tabs: { id: Mode; label: string }[] = [
-  { id: "all", label: "Tout" },
-  { id: "carpool", label: "Covoiturage" },
-  { id: "bus", label: "Bus" },
-];
+type Mode = "all" | "carpool" | "bus" | "train";
 
 export function SearchWidget() {
+  const t = useTranslations("common");
+  const tSearch = useTranslations("search");
+  const locale = useLocale();
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("all");
+  const [fromKey, setFromKey] = useState("Algiers");
+  /** `"any"` = all destinations from departure */
+  const [toKey, setToKey] = useState<string>("Oran");
+
+  const tabs: { id: Mode; label: string; icon: string }[] = [
+    { id: "all", label: t("allModes"), icon: "apps" },
+    { id: "carpool", label: t("modeCarpoolTab"), icon: "directions_car" },
+    { id: "bus", label: t("modeBusTab"), icon: "directions_bus" },
+    { id: "train", label: t("train"), icon: "train" },
+  ];
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const params = new URLSearchParams();
     const form = new FormData(e.currentTarget);
-    const from = String(form.get("from") ?? "").trim();
-    const to = String(form.get("to") ?? "").trim();
+    const from = resolveCityKeyFromParam(String(form.get("from") ?? "").trim(), "Algiers");
+    const toRaw = String(form.get("to") ?? "").trim();
+    const to = toRaw.toLowerCase() === "any" ? "any" : resolveCityKeyFromParam(toRaw, "Oran");
     const date = String(form.get("date") ?? "").trim();
     const passengers = String(form.get("passengers") ?? "1").trim();
     if (from) params.set("from", from);
@@ -32,121 +44,126 @@ export function SearchWidget() {
   }
 
   return (
-    <div className="relative z-20 -mt-10 mx-auto max-w-5xl px-4 sm:-mt-14 sm:px-6 lg:px-8">
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-xl shadow-foreground/5 sm:p-6">
-        <div className="flex gap-1 border-b border-border">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setMode(tab.id)}
-              className={`border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                mode === tab.id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted hover:text-foreground"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+    <section className="relative z-30 -mt-16 px-6">
+      <div className="glass-effect subtle-shadow mx-auto max-w-5xl rounded-xl bg-surface-container-lowest/90 p-6 md:p-8">
+        <div className="mb-6 flex flex-wrap gap-3">
+          {tabs.map((tab) => {
+            const active = mode === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setMode(tab.id)}
+                className={`flex items-center gap-2 rounded-full px-6 py-2 text-sm font-semibold transition-colors ${
+                  active
+                    ? "bg-primary text-on-primary"
+                    : "bg-surface-container-high font-medium text-on-surface-variant hover:bg-surface-container-highest"
+                }`}
+              >
+                <MaterialIcon name={tab.icon} className="!text-base" />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end">
-          <div className="grid flex-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <label className="block">
-              <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted">
-                <MapPinIcon className="h-3.5 w-3.5" />
-                Départ
-              </span>
-              <input
-                name="from"
-                type="text"
-                placeholder="Ville de départ"
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted/80 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                autoComplete="off"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted">
-                <MapPinIcon className="h-3.5 w-3.5" />
-                Destination
-              </span>
-              <input
-                name="to"
-                type="text"
-                placeholder="Ville d&apos;arrivée"
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted/80 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                autoComplete="off"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted">
-                <CalendarIcon className="h-3.5 w-3.5" />
-                Date
-              </span>
-              <input
-                name="date"
-                type="date"
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted">
-                <UsersIcon className="h-3.5 w-3.5" />
-                Passagers
-              </span>
-              <input
-                name="passengers"
-                type="number"
-                min={1}
-                max={8}
-                defaultValue={1}
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </label>
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-2">
+              <label className="ms-2 text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
+                {t("departure")}
+              </label>
+              <div className="relative">
+                <MaterialIcon
+                  name="location_on"
+                  className="pointer-events-none absolute start-4 top-1/2 !text-xl -translate-y-1/2 text-outline"
+                />
+                <StationAutocomplete
+                  name="from"
+                  value={fromKey}
+                  onChange={setFromKey}
+                  placeholder={t("departurePlaceholder")}
+                  locale={locale}
+                  inputClassName="w-full rounded-lg border-none bg-surface-container-low py-4 ps-12 pe-4 font-medium text-on-surface placeholder:text-outline/60 focus:ring-2 focus:ring-primary-container"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="ms-2 text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
+                {t("destination")}
+              </label>
+              <div className="relative">
+                <MaterialIcon
+                  name="near_me"
+                  className="pointer-events-none absolute start-4 top-1/2 !text-xl -translate-y-1/2 text-outline"
+                />
+                <StationAutocomplete
+                  name="to"
+                  value={toKey}
+                  onChange={setToKey}
+                  placeholder={t("destinationPlaceholder")}
+                  locale={locale}
+                  prependOptions={[
+                    {
+                      value: "any",
+                      label: tSearch("destinationAnySelect"),
+                      sublabel: tSearch("destinationAnySummary"),
+                    },
+                  ]}
+                  inputClassName="w-full rounded-lg border-none bg-surface-container-low py-4 ps-12 pe-4 font-medium text-on-surface placeholder:text-outline/60 focus:ring-2 focus:ring-primary-container"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="ms-2 text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
+                  {t("date")}
+                </label>
+                <div className="relative">
+                  <MaterialIcon
+                    name="calendar_month"
+                    className="pointer-events-none absolute start-3 top-1/2 !text-lg -translate-y-1/2 text-outline"
+                  />
+                  <input
+                    name="date"
+                    type="date"
+                    className="w-full rounded-lg border-none bg-surface-container-low py-4 ps-10 pe-3 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary-container"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="ms-2 text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
+                  {t("passengers")}
+                </label>
+                <div className="relative">
+                  <MaterialIcon
+                    name="person"
+                    className="pointer-events-none absolute start-3 top-1/2 !text-lg -translate-y-1/2 text-outline"
+                  />
+                  <input
+                    name="passengers"
+                    type="number"
+                    min={1}
+                    max={8}
+                    defaultValue={1}
+                    className="w-full rounded-lg border-none bg-surface-container-low py-4 ps-10 pe-3 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary-container"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="gradient-primary subtle-shadow flex items-center justify-center gap-2 rounded-lg py-4 font-bold text-on-primary transition-all hover:scale-[1.02] active:scale-95"
+            >
+              <MaterialIcon name="search" className="!text-2xl" />
+              {t("searchButton")}
+            </button>
           </div>
-          <button
-            type="submit"
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-hover lg:min-w-[140px]"
-          >
-            <SearchIcon className="h-4 w-4" />
-            Rechercher
-          </button>
         </form>
       </div>
-    </div>
-  );
-}
-
-function MapPinIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-  );
-}
-
-function CalendarIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-    </svg>
-  );
-}
-
-function UsersIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-    </svg>
-  );
-}
-
-function SearchIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
+    </section>
   );
 }

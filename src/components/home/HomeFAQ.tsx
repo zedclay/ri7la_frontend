@@ -1,57 +1,50 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
+import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
-const faqs = [
-  {
-    q: "Comment payer ma réservation ?",
-    a: "Vous pouvez régler par carte bancaire, Edahabia, CIB ou, selon les trajets, par virement avec justificatif. Le détail s’affiche avant le paiement.",
-  },
-  {
-    q: "Le service est-il disponible partout en Algérie ?",
-    a: "Ri7la couvre progressivement les principales villes et axes inter-villes. La recherche affiche uniquement les trajets disponibles pour vos critères.",
-  },
-  {
-    q: "Puis-je annuler ou modifier ma réservation ?",
-    a: "Les conditions d’annulation et de remboursement dépendent du transporteur ou du conducteur. Consultez la politique indiquée sur votre billet.",
-  },
-];
+export async function HomeFAQ() {
+  const t = await getTranslations("common");
 
-export function HomeFAQ() {
+  const faqs = [
+    { q: t("faq1q"), a: t("faq1a") },
+    { q: t("faq2q"), a: t("faq2a") },
+    { q: t("faq3q"), a: t("faq3a") },
+  ];
+
   return (
-    <section className="border-t border-border bg-card py-16 sm:py-20">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <h2 className="text-center font-serif text-3xl font-semibold text-foreground sm:text-4xl">
-          Questions fréquentes
+    <section className="bg-surface px-6 py-24">
+      <div className="mx-auto max-w-3xl">
+        <h2 className="mb-12 text-center font-headline text-3xl font-bold text-on-surface">
+          {t("faqTitle")}
         </h2>
-        <div className="mt-10 space-y-3">
+        <div className="space-y-4">
           {faqs.map((item) => (
             <details
               key={item.q}
-              className="group rounded-xl border border-border bg-background px-5 py-1 open:shadow-sm"
+              className="group subtle-shadow cursor-pointer rounded-lg bg-surface-container-lowest p-6 open:cursor-default"
             >
-              <summary className="cursor-pointer list-none py-4 font-medium text-foreground marker:content-none [&::-webkit-details-marker]:hidden">
-                <span className="flex items-center justify-between gap-4">
-                  {item.q}
-                  <ChevronIcon className="h-5 w-5 shrink-0 text-muted transition-transform group-open:rotate-180" />
-                </span>
+              <summary className="list-none marker:content-none [&::-webkit-details-marker]:hidden">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="font-semibold text-on-surface">{item.q}</span>
+                  <MaterialIcon
+                    name="expand_more"
+                    className="!text-2xl text-outline transition-colors group-open:rotate-180 group-hover:text-primary"
+                  />
+                </div>
               </summary>
-              <p className="pb-4 text-sm leading-relaxed text-muted">{item.a}</p>
+              <p className="mt-4 text-sm leading-relaxed text-on-surface-variant">{item.a}</p>
             </details>
           ))}
         </div>
-        <p className="mt-8 text-center">
-          <Link href="/help" className="text-sm font-semibold text-primary hover:underline">
-            Consulter notre centre d&apos;aide
+        <div className="mt-10 text-center">
+          <Link
+            href="/help"
+            className="font-bold text-primary underline decoration-primary/30 underline-offset-2 transition-all hover:decoration-primary"
+          >
+            {t("faqHelpLink")}
           </Link>
-        </p>
+        </div>
       </div>
     </section>
-  );
-}
-
-function ChevronIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-    </svg>
   );
 }
