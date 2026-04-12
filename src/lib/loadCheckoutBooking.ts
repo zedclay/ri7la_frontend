@@ -1,4 +1,5 @@
 import { mockBookings } from "@/lib/mockData";
+import { allowDemoMocks } from "@/lib/runtimeEnv";
 import type { Booking } from "@/lib/types";
 import { tripApiRowToBooking, type TripApiRow } from "@/lib/tripApiToBooking";
 import { unwrapApiSuccess } from "@/lib/unwrapApi";
@@ -11,8 +12,10 @@ function apiBase(): string {
  * Resolve checkout booking: mock rows by id, otherwise treat `bookingId` as a trip id from the API.
  */
 export async function loadCheckoutBooking(bookingId: string): Promise<Booking | null> {
-  const mock = mockBookings.find((b) => b.id === bookingId);
-  if (mock) return mock;
+  if (allowDemoMocks()) {
+    const mock = mockBookings.find((b) => b.id === bookingId);
+    if (mock) return mock;
+  }
 
   try {
     const res = await fetch(`${apiBase()}/api/trips/${encodeURIComponent(bookingId)}`, { cache: "no-store" });

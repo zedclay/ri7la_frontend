@@ -20,6 +20,8 @@ export type DemoUser = {
   carColor?: string;
   plateNumber?: string;
   carImageUrl?: string;
+  /** Multiple vehicle photos (data URLs or https URLs). */
+  carImageUrls?: string[];
 };
 
 const KEY_SESSION = "ri7la_demo_session_v1";

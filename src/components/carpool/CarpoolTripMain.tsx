@@ -1,5 +1,9 @@
+"use client";
+
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { carpoolAmenityIcon, type CarpoolAmenityId } from "@/lib/carpoolAmenities";
 
 const DRIVER_IMG =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuACiuG45emmP2PT_nL48qq2PXmmbPthiNzgUdxsBqSaleduzt7Bs468e0XIR66cx1S46WpiT7a3395Ii96dSyL6iBaj5jXt7I-Dx0X8XMMaSt-t4CkwJaImM9okBxRQ6wWPr547hQjjmsS6DxBoq3BC7p3pgDsvtzxoeiXaqxdTZQ-hFTvzmrmpDw_SB-n0hfVPSBwWvXfE5P7rw-4nxsSfa2JxcCu9E_54kd2xdp4gd7FbK6CwmEJRxuZ5Zj_BmTpK8q1PzWYCocqJ";
@@ -11,16 +15,18 @@ function Stars({ count }: { count: number }) {
   return (
     <div className="ml-auto flex text-tertiary">
       {[1, 2, 3, 4, 5].map((i) => (
-        <MaterialIcon
-          key={i}
-          name="star"
-          filled={i <= count}
-          className="!text-xs"
-        />
+        <MaterialIcon key={i} name="star" filled={i <= count} className="!text-xs" />
       ))}
     </div>
   );
 }
+
+const LUGGAGE_TO_I18N: Record<string, "luggageNone" | "luggageSmall" | "luggageMedium" | "luggageLarge"> = {
+  NONE: "luggageNone",
+  SMALL: "luggageSmall",
+  MEDIUM: "luggageMedium",
+  LARGE: "luggageLarge",
+};
 
 export type CarpoolTripViewModel = {
   id: string;
@@ -30,6 +36,7 @@ export type CarpoolTripViewModel = {
   departureTime: string;
   arrivalTime: string;
   durationLabel: string;
+  durationHoursApprox: number | null;
   seatsAvailable: number;
   seatsTotal: number;
   driverName: string;
@@ -37,9 +44,37 @@ export type CarpoolTripViewModel = {
   plateNumber: string | null;
   originName: string;
   destinationName: string;
+  luggagePolicy: string;
+  smokingAllowed: boolean;
+  petsAllowed: boolean;
+  womenOnly: boolean;
+  driverNote: string | null;
+  tripRules: string | null;
+  amenities: string[];
 };
 
 export function CarpoolTripMain({ trip }: { trip: CarpoolTripViewModel }) {
+  const t = useTranslations("carpoolTrip");
+  const td = useTranslations("driverTripNew");
+
+  const luggageKey = LUGGAGE_TO_I18N[trip.luggagePolicy] ?? "luggageMedium";
+  const luggageLabel = td(luggageKey);
+  const durationSecondary =
+    trip.durationHoursApprox != null && Number.isFinite(trip.durationHoursApprox)
+      ? t("duration", { hours: trip.durationHoursApprox })
+      : trip.durationLabel;
+
+  const validAmenities = trip.amenities.filter((a): a is CarpoolAmenityId =>
+    [
+      "AIR_CONDITIONING",
+      "COMFORTABLE_SEATS",
+      "USB_CHARGING",
+      "WIFI",
+      "LARGE_TRUNK",
+      "EXTRA_LEGROOM",
+    ].includes(a)
+  );
+
   return (
     <div className="lg:col-span-8 space-y-8">
       <section className="rounded-xl bg-surface-container-lowest p-8 shadow-[0_12px_32px_-4px_rgba(0,83,91,0.04)]">
@@ -54,7 +89,7 @@ export function CarpoolTripMain({ trip }: { trip: CarpoolTripViewModel }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
           <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-[10px] font-extrabold text-on-surface">
             <MaterialIcon name="directions_car" className="!text-sm text-primary" />
-            Covoiturage
+            Carpool
           </div>
         </div>
         <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
@@ -63,19 +98,15 @@ export function CarpoolTripMain({ trip }: { trip: CarpoolTripViewModel }) {
               <MaterialIcon name="directions_car" filled className="!text-sm" />
               Carpool
             </span>
-            <h1 className="mb-2 font-headline text-3xl font-bold text-on-surface">
-              {trip.title}
-            </h1>
+            <h1 className="mb-2 font-headline text-3xl font-bold text-on-surface">{trip.title}</h1>
             <p className="flex items-center gap-2 text-on-surface-variant">
               <MaterialIcon name="calendar_today" className="!text-sm" />
               {trip.dateLabel}
             </p>
           </div>
           <div className="text-right">
-            <div className="mb-1 text-lg font-bold text-primary">
-              {trip.seatsAvailable} seat{trip.seatsAvailable === 1 ? "" : "s"} available
-            </div>
-            <div className="text-sm text-on-surface-variant">{trip.durationLabel} total duration</div>
+            <div className="mb-1 text-lg font-bold text-primary">{t("seatsAvailable", { count: trip.seatsAvailable })}</div>
+            <div className="text-sm text-on-surface-variant">{durationSecondary}</div>
           </div>
         </div>
 
@@ -90,11 +121,11 @@ export function CarpoolTripMain({ trip }: { trip: CarpoolTripViewModel }) {
           <div className="flex flex-col gap-12 pt-1">
             <div>
               <div className="text-lg font-bold text-on-surface">{trip.originName}</div>
-              <div className="text-sm text-on-surface-variant">Gare Routière Caroubier</div>
+              <div className="text-sm text-on-surface-variant">{t("pickupHint")}</div>
             </div>
             <div className="mt-4">
               <div className="text-lg font-bold text-on-surface">{trip.destinationName}</div>
-              <div className="text-sm text-on-surface-variant">Station Yaghmoracen</div>
+              <div className="text-sm text-on-surface-variant">{t("dropoffHint")}</div>
             </div>
           </div>
         </div>
@@ -102,67 +133,45 @@ export function CarpoolTripMain({ trip }: { trip: CarpoolTripViewModel }) {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <section className="rounded-xl bg-surface-container-low p-6">
-          <h3 className="mb-6 text-xs font-bold uppercase tracking-widest text-on-surface-variant">
-            Driver
-          </h3>
+          <h3 className="mb-6 text-xs font-bold uppercase tracking-widest text-on-surface-variant">Driver</h3>
           <div className="mb-6 flex items-center gap-4">
             <div className="relative shrink-0">
               <div className="relative h-16 w-16 overflow-hidden rounded-full">
-                <Image src={DRIVER_IMG} alt="Ahmed" fill className="object-cover" sizes="64px" />
+                <Image src={DRIVER_IMG} alt="" fill className="object-cover" sizes="64px" />
               </div>
               <div className="absolute -bottom-1 -right-1 rounded-full border-2 border-surface-container-low bg-primary p-1 text-white">
                 <MaterialIcon name="verified" filled className="!text-xs" />
               </div>
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-2 text-xl font-bold text-on-surface">
-                {trip.driverName}
-                <span className="inline-flex items-center rounded bg-white px-2 py-0.5 text-xs font-bold text-primary">
-                  Verified
-                </span>
-              </div>
-              <div className="flex items-center gap-1 font-bold text-tertiary">
-                <MaterialIcon name="star" filled className="!text-sm" />
-                4.8
-                <span className="ml-1 text-xs font-normal text-on-surface-variant">
-                  (120+ trips)
-                </span>
-              </div>
+              <div className="flex flex-wrap items-center gap-2 text-xl font-bold text-on-surface">{trip.driverName}</div>
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-full bg-white/60 px-3 py-1 text-xs font-medium text-on-surface-variant">
-              Fast Responder
-            </span>
-            <span className="rounded-full bg-white/60 px-3 py-1 text-xs font-medium text-on-surface-variant">
-              Experienced Driver
-            </span>
           </div>
         </section>
 
         <section className="rounded-xl bg-surface-container-low p-6">
-          <h3 className="mb-6 text-xs font-bold uppercase tracking-widest text-on-surface-variant">
-            Vehicle
-          </h3>
+          <h3 className="mb-6 text-xs font-bold uppercase tracking-widest text-on-surface-variant">{t("vehicleComfort")}</h3>
           <div className="flex items-start gap-4">
             <div className="rounded-lg bg-white/60 p-3">
               <MaterialIcon name="directions_car" className="!text-3xl text-primary" />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="text-xl font-bold text-on-surface">{trip.vehicleLabel}</div>
               <div className="mb-4 text-sm text-on-surface-variant">
-                {trip.plateNumber ? `Plate • ${trip.plateNumber}` : "Plate • —"}
+                {trip.plateNumber ? `• ${trip.plateNumber}` : "—"}
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                  <MaterialIcon name="ac_unit" className="!text-lg" />
-                  Air Conditioning
+              {validAmenities.length === 0 ? (
+                <p className="text-sm text-on-surface-variant">{t("noAmenities")}</p>
+              ) : (
+                <div className="space-y-2">
+                  {validAmenities.map((id) => (
+                    <div key={id} className="flex items-center gap-2 text-sm text-on-surface-variant">
+                      <MaterialIcon name={carpoolAmenityIcon(id)} className="!text-lg shrink-0 text-primary" />
+                      <span>{(td as (key: string) => string)(`amenity_${id}`)}</span>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                  <MaterialIcon name="airline_seat_recline_normal" className="!text-lg" />
-                  Comfortable Seats
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </section>
@@ -170,7 +179,9 @@ export function CarpoolTripMain({ trip }: { trip: CarpoolTripViewModel }) {
 
       <section className="overflow-hidden rounded-xl bg-surface-container-lowest shadow-[0_12px_32px_-4px_rgba(0,83,91,0.04)]">
         <div className="border-b border-surface-container p-6">
-          <h3 className="text-lg font-bold text-on-surface">Pickup & Drop-off</h3>
+          <h3 className="text-lg font-bold text-on-surface">
+            {t("pickup")} &amp; {t("dropoff")}
+          </h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="space-y-6 p-6">
@@ -179,10 +190,10 @@ export function CarpoolTripMain({ trip }: { trip: CarpoolTripViewModel }) {
                 <MaterialIcon name="location_on" className="!text-xl text-primary" />
               </div>
               <div>
-                <div className="font-bold text-on-surface">Pickup: {trip.originName}</div>
-                <div className="text-sm text-on-surface-variant">
-                  Main entrance, Caroubier terminal. Driver will wait near the clock tower.
+                <div className="font-bold text-on-surface">
+                  {t("pickup")}: {trip.originName}
                 </div>
+                <div className="text-sm text-on-surface-variant">{t("pickupHint")}</div>
               </div>
             </div>
             <div className="flex gap-4">
@@ -190,17 +201,23 @@ export function CarpoolTripMain({ trip }: { trip: CarpoolTripViewModel }) {
                 <MaterialIcon name="location_on" className="!text-xl text-tertiary" />
               </div>
               <div>
-                <div className="font-bold text-on-surface">Drop-off: {trip.destinationName}</div>
-                <div className="text-sm text-on-surface-variant">
-                  Station Yaghmoracen, opposite the public pharmacy.
+                <div className="font-bold text-on-surface">
+                  {t("dropoff")}: {trip.destinationName}
                 </div>
+                <div className="text-sm text-on-surface-variant">{t("dropoffHint")}</div>
               </div>
             </div>
+            {trip.driverNote?.trim() ? (
+              <div className="rounded-xl bg-surface-container-low/80 p-4 text-sm text-on-surface">
+                <span className="font-bold text-on-surface-variant">{t("driverNote")}: </span>
+                {trip.driverNote.trim()}
+              </div>
+            ) : null}
           </div>
           <div className="relative h-72 w-full bg-surface-container md:h-full md:min-h-[280px]">
             <Image
               src={MAP_IMG}
-              alt="Map preview along the route"
+              alt=""
               fill
               className="object-cover opacity-60 grayscale"
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -211,7 +228,7 @@ export function CarpoolTripMain({ trip }: { trip: CarpoolTripViewModel }) {
                 className="flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-sm font-bold text-primary shadow-lg backdrop-blur"
               >
                 <MaterialIcon name="map" className="!text-sm" />
-                View Full Map
+                Map
               </button>
             </div>
           </div>
@@ -221,50 +238,63 @@ export function CarpoolTripMain({ trip }: { trip: CarpoolTripViewModel }) {
       <section className="rounded-xl bg-surface-container-low p-8">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
           <div>
-            <h3 className="mb-6 text-lg font-bold text-on-surface">Trip Rules</h3>
+            <h3 className="mb-6 text-lg font-bold text-on-surface">{t("tripRules")}</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between rounded-lg bg-white/40 p-3">
                 <div className="flex items-center gap-3">
                   <MaterialIcon name="luggage" className="!text-xl text-on-surface-variant" />
-                  <span className="text-sm font-medium text-on-surface">Luggage Allowance</span>
+                  <span className="text-sm font-medium text-on-surface">{t("luggage")}</span>
                 </div>
-                <span className="text-sm font-bold text-primary">Medium</span>
+                <span className="text-sm font-bold text-primary">{luggageLabel}</span>
               </div>
-              <div className="flex items-center justify-between p-3 opacity-50">
+              <div className="flex items-center justify-between rounded-lg bg-white/40 p-3">
                 <div className="flex items-center gap-3">
-                  <MaterialIcon name="smoke_free" className="!text-xl" />
-                  <span className="text-sm font-medium text-on-surface">No smoking</span>
+                  <MaterialIcon name={trip.smokingAllowed ? "smoking_rooms" : "smoke_free"} className="!text-xl text-on-surface-variant" />
+                  <span className="text-sm font-medium text-on-surface">{t("smoking")}</span>
                 </div>
-                <MaterialIcon name="cancel" className="!text-lg text-error" />
+                <span className="text-sm font-bold text-primary">
+                  {trip.smokingAllowed ? t("smokingAllowed") : t("smokingNotAllowed")}
+                </span>
               </div>
-              <div className="flex items-center justify-between p-3 opacity-50">
+              <div className="flex items-center justify-between rounded-lg bg-white/40 p-3">
                 <div className="flex items-center gap-3">
-                  <MaterialIcon name="pets" className="!text-xl" />
-                  <span className="text-sm font-medium text-on-surface">No pets</span>
+                  <MaterialIcon name="pets" className="!text-xl text-on-surface-variant" />
+                  <span className="text-sm font-medium text-on-surface">{t("pets")}</span>
                 </div>
-                <MaterialIcon name="cancel" className="!text-lg text-error" />
+                <span className="text-sm font-bold text-primary">
+                  {trip.petsAllowed ? t("petsAllowed") : t("petsNotAllowed")}
+                </span>
               </div>
               <div className="flex items-center justify-between rounded-lg bg-white/40 p-3">
                 <div className="flex items-center gap-3">
                   <MaterialIcon name="woman" className="!text-xl text-on-surface-variant" />
-                  <span className="text-sm font-medium text-on-surface">Women-only trip</span>
+                  <span className="text-sm font-medium text-on-surface">{t("womenOnly")}</span>
                 </div>
-                <div className="relative h-5 w-10 rounded-full bg-outline-variant/30">
-                  <div className="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white" />
-                </div>
+                <span className="text-sm font-bold text-primary">
+                  {trip.womenOnly ? t("womenOnlyOn") : t("womenOnlyOff")}
+                </span>
               </div>
             </div>
+            {trip.tripRules?.trim() ? (
+              <div className="mt-6">
+                <h4 className="mb-2 text-sm font-bold text-on-surface-variant">{t("tripRulesExtra")}</h4>
+                <p className="whitespace-pre-wrap rounded-xl bg-white/50 p-4 text-sm text-on-surface">{trip.tripRules.trim()}</p>
+              </div>
+            ) : null}
           </div>
           <div>
-            <h3 className="mb-6 text-lg font-bold text-on-surface">Driver&apos;s Note</h3>
-            <div className="relative rounded-xl bg-white/60 p-6 italic leading-relaxed text-on-surface-variant">
+            <h3 className="mb-6 text-lg font-bold text-on-surface">{t("driverNote")}</h3>
+            <div className="relative rounded-xl bg-white/60 p-6 leading-relaxed text-on-surface-variant">
               <MaterialIcon
                 name="format_quote"
                 filled
                 className="absolute -left-2 -top-3 !text-4xl text-primary/10"
               />
-              &quot;I appreciate punctuality. Please be at the pickup point 10 mins early.
-              We&apos;ll have one short break for coffee halfway through the journey.&quot;
+              {trip.driverNote?.trim() ? (
+                <p className="italic">{trip.driverNote.trim()}</p>
+              ) : (
+                <p className="text-sm">{t("driverNoteEmpty")}</p>
+              )}
             </div>
           </div>
         </div>
@@ -288,8 +318,7 @@ export function CarpoolTripMain({ trip }: { trip: CarpoolTripViewModel }) {
               <Stars count={5} />
             </div>
             <p className="text-sm italic text-on-surface-variant">
-              &quot;Great driver, very safe and steady driving. Highly recommend for the Algiers-Oran
-              route.&quot;
+              &quot;Great driver, very safe and steady driving. Highly recommend for the Algiers-Oran route.&quot;
             </p>
           </div>
           <div className="rounded-xl bg-surface-container-lowest p-6 shadow-sm">

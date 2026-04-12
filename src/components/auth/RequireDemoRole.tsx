@@ -2,8 +2,8 @@
 
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useEffect } from "react";
-import { apiGetJsonData } from "@/lib/api";
 import { getAuthTokens } from "@/lib/auth";
+import { fetchUserMeClientCached } from "@/lib/userMeClientCache";
 
 type AppRole = "passenger" | "driver" | "admin";
 
@@ -33,16 +33,16 @@ export function RequireDemoRole({
 
   useEffect(() => {
     const tokens = getAuthTokens();
+    /** Let the page render (e.g. “Sign in to see your bookings”) instead of forcing login first. */
     if (!tokens) {
-      const next = pathname || "/";
-      router.replace(`/auth/login?next=${encodeURIComponent(next)}`);
       return;
     }
     let cancelled = false;
     async function check() {
       try {
-        const res = await apiGetJsonData<{ roles: string[] }>("/api/users/me");
+        const res = await fetchUserMeClientCached();
         if (cancelled) return;
+        if (!res) return;
         const myRole = roleFromBackend(res.roles);
         if (myRole !== role) {
           router.replace(dashboardForRole(myRole));

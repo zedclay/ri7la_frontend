@@ -45,6 +45,32 @@ export async function apiPostJsonData<T>(path: string, body: unknown, init?: Req
   return unwrapData<T>(raw);
 }
 
+export async function apiPatchJson<T>(path: string, body: unknown, init?: RequestInit): Promise<T> {
+  const url = `${apiBaseUrl()}${path.startsWith("/") ? "" : "/"}${path}`;
+  const initHeaders = normalizeHeaders(init);
+  const res = await fetch(url, {
+    ...init,
+    method: "PATCH",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      ...authHeaders(),
+      ...initHeaders,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throwHttpError(res.status, res.statusText, text);
+  }
+  return (await res.json()) as T;
+}
+
+export async function apiPatchJsonData<T>(path: string, body: unknown, init?: RequestInit): Promise<T> {
+  const raw = await apiPatchJson<unknown>(path, body, init);
+  return unwrapData<T>(raw);
+}
+
 /** GET and return the nested `data` payload. */
 export async function apiGetJsonData<T>(path: string, init?: RequestInit): Promise<T> {
   const raw = await apiGetJson<unknown>(path, init);

@@ -11,6 +11,7 @@ import { displayForCityKey, resolveCityKeyFromParam } from "@/lib/algeriaPlaces"
 import { busCoverImage, coverForCarMake, trainCoverImage } from "@/lib/coverImages";
 import { splitTicketPrice } from "@/lib/tripPricing";
 import { mockSearchResults } from "@/lib/mockData";
+import { allowDemoMocks } from "@/lib/runtimeEnv";
 import type { SearchResult } from "@/lib/types";
 
 const DRIVER_IMG =
@@ -59,6 +60,13 @@ function isoDay(d: Date) {
   const dd = String(d.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
 }
+
+type TripSearchPage = {
+  items: TripSearchRow[];
+  total: number;
+  limit: number;
+  offset: number;
+};
 
 type TripSearchRow = {
   id: string;
@@ -226,6 +234,7 @@ export function SearchFiltersAndResults() {
   const [apiBuses, setApiBuses] = useState<SearchResult[]>([]);
   const [apiTrains, setApiTrains] = useState<SearchResult[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
   const [apiFailedCarpool, setApiFailedCarpool] = useState(false);
   const [apiFailedBus, setApiFailedBus] = useState(false);
   const [apiFailedTrain, setApiFailedTrain] = useState(false);
@@ -282,10 +291,10 @@ export function SearchFiltersAndResults() {
             try {
               const qs = new URLSearchParams({ fromCity: from, date, mode: "CARPOOL" });
               if (to) qs.set("toCity", to);
-              const rows = await apiGetJsonData<TripSearchRow[]>(`/api/trips/search?${qs.toString()}`);
+              const page = await apiGetJsonData<TripSearchPage>(`/api/trips/search?${qs.toString()}`);
               if (cancelled) return;
               setApiFailedCarpool(false);
-              setApiCarpools(mapCarpoolRows(rows));
+              setApiCarpools(mapCarpoolRows(page.items));
             } catch (e) {
               if (cancelled) return;
               setApiFailedCarpool(true);
@@ -302,10 +311,10 @@ export function SearchFiltersAndResults() {
             try {
               const qs = new URLSearchParams({ fromCity: from, date, mode: "BUS" });
               if (to) qs.set("toCity", to);
-              const rows = await apiGetJsonData<TripSearchRow[]>(`/api/trips/search?${qs.toString()}`);
+              const page = await apiGetJsonData<TripSearchPage>(`/api/trips/search?${qs.toString()}`);
               if (cancelled) return;
               setApiFailedBus(false);
-              setApiBuses(mapBusRows(rows));
+              setApiBuses(mapBusRows(page.items));
             } catch (e) {
               if (cancelled) return;
               setApiFailedBus(true);
@@ -322,10 +331,10 @@ export function SearchFiltersAndResults() {
             try {
               const qs = new URLSearchParams({ fromCity: from, date, mode: "TRAIN" });
               if (to) qs.set("toCity", to);
-              const rows = await apiGetJsonData<TripSearchRow[]>(`/api/trips/search?${qs.toString()}`);
+              const page = await apiGetJsonData<TripSearchPage>(`/api/trips/search?${qs.toString()}`);
               if (cancelled) return;
               setApiFailedTrain(false);
-              setApiTrains(mapTrainRows(rows));
+              setApiTrains(mapTrainRows(page.items));
             } catch (e) {
               if (cancelled) return;
               setApiFailedTrain(true);
@@ -342,7 +351,7 @@ export function SearchFiltersAndResults() {
     return () => {
       cancelled = true;
     };
-  }, [bus, carpool, train, requestParams]);
+  }, [bus, carpool, train, requestParams, retryKey]);
 
   const chips = useMemo(() => {
     const list: { key: string; label: string; onRemove: () => void }[] = [];
@@ -380,11 +389,12 @@ export function SearchFiltersAndResults() {
   }
 
   const visibleResults = useMemo(() => {
+    const useMocks = allowDemoMocks();
     const carpoolList =
-      carpool && apiFailedCarpool ? mockSearchResults.filter((r) => r.mode === "carpool") : apiCarpools;
-    const busList = bus && apiFailedBus ? mockSearchResults.filter((r) => r.mode === "bus") : apiBuses;
+      useMocks && carpool && apiFailedCarpool ? mockSearchResults.filter((r) => r.mode === "carpool") : apiCarpools;
+    const busList = useMocks && bus && apiFailedBus ? mockSearchResults.filter((r) => r.mode === "bus") : apiBuses;
     const trainList =
-      train && apiFailedTrain ? mockSearchResults.filter((r) => r.mode === "train") : apiTrains;
+      useMocks && train && apiFailedTrain ? mockSearchResults.filter((r) => r.mode === "train") : apiTrains;
 
     const base = [
       ...(carpool ? carpoolList : []),
@@ -582,8 +592,18 @@ export function SearchFiltersAndResults() {
 
       <div className="col-span-12 space-y-6 lg:col-span-6">
         {apiError && (
-          <div className="rounded-xl bg-error-container px-4 py-3 text-sm font-semibold text-on-error-container">
-            {apiError}
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-error-container px-4 py-3 text-sm font-semibold text-on-error-container">
+            <span>{apiError}</span>
+            <button
+              type="button"
+              onClick={() => {
+                setApiError(null);
+                setRetryKey((k) => k + 1);
+              }}
+              className="rounded-full bg-on-error-container/15 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-on-error-container hover:bg-on-error-container/25"
+            >
+              Retry
+            </button>
           </div>
         )}
         <div className="flex flex-col gap-4">

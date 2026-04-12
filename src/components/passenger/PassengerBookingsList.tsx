@@ -1,6 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { applySnapshotToBooking, loadCompletedBookingIds, loadConfirmedSnapshot } from "@/lib/confirmedBooking";
@@ -56,7 +57,15 @@ function mergeSnapshotsInto(rows: Booking[]): Booking[] {
 
 type Props = { initialBookings?: Booking[] };
 
+function canMessageDriverOnBooking(b: Booking) {
+  return (
+    b.mode === "carpool" &&
+    (b.status === "requested" || b.status === "awaiting_approval" || b.status === "confirmed")
+  );
+}
+
 export function PassengerBookingsList({ initialBookings = [] }: Props) {
+  const tMsg = useTranslations("messaging");
   const [rows, setRows] = useState<Booking[]>(initialBookings);
   const [ticketTripIds, setTicketTripIds] = useState<Set<string>>(() => snapshotTicketTripIds());
   const [loading, setLoading] = useState(true);
@@ -248,6 +257,15 @@ export function PassengerBookingsList({ initialBookings = [] }: Props) {
                     <MaterialIcon name="download" className="!text-lg" />
                     Download ticket
                   </button>
+                ) : null}
+                {canMessageDriverOnBooking(b) ? (
+                  <Link
+                    href={`/passenger/messages?booking=${encodeURIComponent(b.id)}`}
+                    className="inline-flex items-center gap-2 rounded-full border-2 border-primary/30 bg-primary-container/15 px-5 py-2.5 text-xs font-extrabold text-primary-container active:scale-95"
+                  >
+                    <MaterialIcon name="chat" className="!text-lg" />
+                    {tMsg("ctaMessageDriver")}
+                  </Link>
                 ) : null}
                 <Link
                   href={`/passenger/bookings/${b.id}`}

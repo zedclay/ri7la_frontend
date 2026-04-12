@@ -27,7 +27,7 @@ export function VerifyAccountClient() {
     return "passenger";
   }, [flow, roleParam]);
 
-  const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const [digits, setDigits] = useState<string[]>(["", "", "", ""]);
   const [error, setError] = useState<string | null>(null);
   const [resentHint, setResentHint] = useState(false);
   const [profileFullName, setProfileFullName] = useState("");
@@ -40,7 +40,7 @@ export function VerifyAccountClient() {
     !isSignup ||
     (profileFullName.trim().length >= 2 && isValidEmail(profileEmail));
   const canVerify =
-    phone.length > 0 && profileOk && code.length === 6 && digits.every((d) => d.length === 1);
+    phone.length > 0 && profileOk && code.length === 4 && digits.every((d) => d.length === 1);
 
   useEffect(() => {
     if (!isSignup) return;
@@ -183,19 +183,19 @@ export function VerifyAccountClient() {
 
           <div className="mt-10 space-y-6">
             <div
-              className="grid grid-cols-6 gap-3"
+              className="grid grid-cols-4 gap-3"
               dir="ltr"
               onPaste={(e) => {
                 e.preventDefault();
-                const text = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+                const text = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 4);
                 if (!text) return;
                 const chars = text.split("");
                 setDigits((prev) => {
                   const next = [...prev];
-                  for (let i = 0; i < 6; i++) next[i] = chars[i] ?? "";
+                  for (let i = 0; i < 4; i++) next[i] = chars[i] ?? "";
                   return next;
                 });
-                focusInput(Math.min(chars.length, 5));
+                focusInput(Math.min(chars.length, 3));
               }}
             >
               {digits.map((d, idx) => (
@@ -208,7 +208,7 @@ export function VerifyAccountClient() {
                   inputMode="numeric"
                   pattern="\d*"
                   autoComplete={idx === 0 ? "one-time-code" : "off"}
-                  maxLength={6}
+                  maxLength={1}
                   aria-label={t("digitN", { n: idx + 1 })}
                   value={d}
                   onChange={(e) => {
@@ -223,16 +223,16 @@ export function VerifyAccountClient() {
                         next[idx] = raw;
                         return next;
                       });
-                      if (idx < 5) focusInput(idx + 1);
+                      if (idx < 3) focusInput(idx + 1);
                       return;
                     }
-                    const chars = raw.slice(0, 6).split("");
+                    const chars = raw.slice(0, 4).split("");
                     setDigits((prev) => {
                       const next = [...prev];
-                      for (let j = 0; j < chars.length && idx + j < 6; j++) next[idx + j] = chars[j] ?? "";
+                      for (let j = 0; j < chars.length && idx + j < 4; j++) next[idx + j] = chars[j] ?? "";
                       return next;
                     });
-                    focusInput(Math.min(idx + chars.length - 1, 5));
+                    focusInput(Math.min(idx + chars.length - 1, 3));
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Backspace" && e.currentTarget.value === "" && idx > 0) {
@@ -244,7 +244,7 @@ export function VerifyAccountClient() {
                       focusInput(idx - 1);
                       e.preventDefault();
                     }
-                    if (e.key === "ArrowRight" && idx < 5) {
+                    if (e.key === "ArrowRight" && idx < 3) {
                       focusInput(idx + 1);
                       e.preventDefault();
                     }

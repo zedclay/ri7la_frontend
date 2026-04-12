@@ -4,7 +4,9 @@ import { Link } from "@/i18n/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { clearAuth } from "@/lib/auth";
 import { clearDemoSession } from "@/lib/demoSession";
+import { invalidateUserMeClientCache } from "@/lib/userMeClientCache";
 
 export function PassengerSidebar() {
   const t = useTranslations("common");
@@ -61,6 +63,8 @@ export function PassengerSidebar() {
           type="button"
           className="mt-4 flex w-full items-center justify-center gap-2 text-sm font-bold text-error"
           onClick={() => {
+            clearAuth();
+            invalidateUserMeClientCache();
             clearDemoSession();
             router.push("/auth/login");
           }}

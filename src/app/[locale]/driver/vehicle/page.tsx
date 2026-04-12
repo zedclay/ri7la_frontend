@@ -1,9 +1,24 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Image from "next/image";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { getCurrentDemoUser, updateCurrentDemoUser } from "@/lib/demoSession";
+
+function readFilesAsDataUrls(files: FileList): Promise<string[]> {
+  const arr = Array.from(files);
+  return Promise.all(
+    arr.map(
+      (f) =>
+        new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(f);
+        }),
+    ),
+  ).then((urls) => urls.filter(Boolean));
+}
 
 export default function DriverVehicleInfoPage() {
   const me = getCurrentDemoUser();
@@ -11,19 +26,56 @@ export default function DriverVehicleInfoPage() {
   const [carModel, setCarModel] = useState(() => me?.carModel ?? "Logan");
   const [carColor, setCarColor] = useState(() => me?.carColor ?? "White");
   const [plateNumber, setPlateNumber] = useState(() => me?.plateNumber ?? "01234 122 16");
-  const [carImageUrl, setCarImageUrl] = useState(() => me?.carImageUrl ?? "");
+  const [carImageUrls, setCarImageUrls] = useState<string[]>(() => {
+    if (me?.carImageUrls?.length) return [...me.carImageUrls];
+    if (me?.carImageUrl) return [me.carImageUrl];
+    return [];
+  });
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const persistVehicle = useCallback((urls: string[]) => {
+    updateCurrentDemoUser({
+      carMake: carMake.trim() || undefined,
+      carModel: carModel.trim() || undefined,
+      carColor: carColor.trim() || undefined,
+      plateNumber: plateNumber.trim() || undefined,
+      carImageUrls: urls.length ? urls : undefined,
+      carImageUrl: urls[0] ?? undefined,
+    });
+  }, [carMake, carModel, carColor, plateNumber]);
 
   const previewUrl = useMemo(() => {
-    if (carImageUrl.trim().length > 0) return carImageUrl.trim();
+    if (carImageUrls.length > 0) return carImageUrls[Math.min(activeIndex, carImageUrls.length - 1)]!;
     return "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1400&q=80";
-  }, [carImageUrl]);
+  }, [carImageUrls, activeIndex]);
+
+  function addImagesFromFiles(files: FileList | null) {
+    if (!files?.length) return;
+    void readFilesAsDataUrls(files).then((urls) => {
+      setCarImageUrls((prev) => {
+        const next = [...prev, ...urls];
+        persistVehicle(next);
+        return next;
+      });
+      setActiveIndex((i) => i);
+    });
+  }
+
+  function removeImage(index: number) {
+    setCarImageUrls((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      persistVehicle(next);
+      setActiveIndex((ai) => Math.min(ai, Math.max(0, next.length - 1)));
+      return next;
+    });
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
       <div>
         <h1 className="font-headline text-3xl font-extrabold text-on-surface">Vehicle Info</h1>
         <p className="mt-1 text-on-surface-variant">
-          Manage your vehicle details, seat capacity, and documentation.
+          Manage your vehicle details and add several photos (insurance, registration, etc. stay in Documents below).
         </p>
       </div>
 
@@ -34,24 +86,48 @@ export default function DriverVehicleInfoPage() {
             <button
               type="button"
               className="text-xs font-bold text-primary underline underline-offset-4"
-              onClick={() => {
-                updateCurrentDemoUser({
-                  carMake: carMake.trim() || undefined,
-                  carModel: carModel.trim() || undefined,
-                  carColor: carColor.trim() || undefined,
-                  plateNumber: plateNumber.trim() || undefined,
-                  carImageUrl: carImageUrl.trim() || undefined,
-                });
-              }}
+              onClick={() => persistVehicle(carImageUrls)}
             >
               Save
             </button>
           </div>
 
           <div className="overflow-hidden rounded-2xl bg-surface-container-low">
-            <div className="relative h-44 overflow-hidden bg-surface-container-low">
+            <div className="relative h-52 overflow-hidden bg-surface-container-low sm:h-64">
               <Image src={previewUrl} alt="Car" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 900px" unoptimized />
               <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
+              {carImageUrls.length > 1 ? (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Previous photo"
+                    className="absolute start-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm active:scale-95"
+                    onClick={() => setActiveIndex((i) => (i - 1 + carImageUrls.length) % carImageUrls.length)}
+                  >
+                    <MaterialIcon name="chevron_left" className="!text-2xl rtl:rotate-180" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Next photo"
+                    className="absolute end-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm active:scale-95"
+                    onClick={() => setActiveIndex((i) => (i + 1) % carImageUrls.length)}
+                  >
+                    <MaterialIcon name="chevron_right" className="!text-2xl rtl:rotate-180" />
+                  </button>
+                  <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+                    {carImageUrls.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        aria-label={`Photo ${i + 1}`}
+                        aria-current={i === activeIndex}
+                        className={`h-2 w-2 rounded-full ${i === activeIndex ? "bg-white" : "bg-white/40"}`}
+                        onClick={() => setActiveIndex(i)}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : null}
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -93,48 +169,50 @@ export default function DriverVehicleInfoPage() {
                 </div>
               </div>
 
-              <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded-2xl bg-white/60 px-4 py-4">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-                    Car image
-                  </div>
-                  <div className="mt-3 flex flex-col gap-3">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (!f) return;
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                          const v = typeof reader.result === "string" ? reader.result : "";
-                          if (!v) return;
-                          setCarImageUrl(v);
-                          updateCurrentDemoUser({ carImageUrl: v });
-                        };
-                        reader.readAsDataURL(f);
-                      }}
-                      className="w-full text-xs font-semibold text-on-surface-variant"
-                    />
-                    <input
-                      value={carImageUrl}
-                      onChange={(e) => setCarImageUrl(e.target.value)}
-                      className="w-full rounded-xl border-none bg-white px-4 py-3 text-xs font-bold text-on-surface outline-none focus:ring-2 focus:ring-primary/20"
-                      placeholder="Or paste an image URL"
-                    />
-                  </div>
-                </div>
-
-                <div className="rounded-2xl bg-white/60 px-4 py-4">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-                    Preview
-                  </div>
-                  <div className="mt-3 overflow-hidden rounded-xl bg-white">
-                    <div className="relative h-32 w-full">
-                      <Image src={previewUrl} alt="Preview" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 600px" unoptimized />
-                    </div>
-                  </div>
-                </div>
+              <div className="mt-5 rounded-2xl bg-white/60 px-4 py-4">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Vehicle photos</div>
+                <p className="mt-1 text-xs text-on-surface-variant">Add several images (exterior, interior, plates). Stored in this browser session.</p>
+                <label className="mt-3 flex cursor-pointer flex-col gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="sr-only"
+                    onChange={(e) => {
+                      addImagesFromFiles(e.target.files);
+                      e.target.value = "";
+                    }}
+                  />
+                  <span className="inline-flex w-fit items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-extrabold text-on-primary shadow-md active:scale-95">
+                    <MaterialIcon name="add_a_photo" className="!text-xl" />
+                    Add photos
+                  </span>
+                </label>
+                {carImageUrls.length > 0 ? (
+                  <ul className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                    {carImageUrls.map((url, index) => (
+                      <li key={`${index}-${url.slice(0, 24)}`} className="relative aspect-[4/3] overflow-hidden rounded-xl bg-surface-container-low">
+                        <button
+                          type="button"
+                          className="relative h-full w-full"
+                          onClick={() => setActiveIndex(index)}
+                        >
+                          <Image src={url} alt="" fill className="object-cover" sizes="200px" unoptimized />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Remove photo"
+                          className="absolute end-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm active:scale-95"
+                          onClick={() => removeImage(index)}
+                        >
+                          <MaterialIcon name="close" className="!text-lg" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-3 text-xs font-medium text-on-surface-variant">No photos yet — use “Add photos”.</p>
+                )}
               </div>
 
               <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -190,9 +268,19 @@ export default function DriverVehicleInfoPage() {
             <div className="mt-2 text-sm text-white/80">
               Clear vehicle photos and valid insurance improve trust and booking rate.
             </div>
-            <button type="button" className="mt-4 rounded-full bg-white px-6 py-3 text-sm font-extrabold text-primary-container">
-              Add Photos
-            </button>
+            <label className="mt-4 inline-flex cursor-pointer rounded-full bg-white px-6 py-3 text-sm font-extrabold text-primary-container active:scale-95">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="sr-only"
+                onChange={(e) => {
+                  addImagesFromFiles(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+              Add photos
+            </label>
           </div>
         </div>
       </div>

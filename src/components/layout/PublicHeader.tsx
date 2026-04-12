@@ -5,8 +5,8 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
-import { apiGetJsonData } from "@/lib/api";
 import { clearAuth, getAuthTokens } from "@/lib/auth";
+import { fetchUserMeClientCached } from "@/lib/userMeClientCache";
 
 type NavItem = { href: string; label: string; match: (p: string) => boolean };
 
@@ -189,12 +189,13 @@ export function PublicHeader() {
         return;
       }
       try {
-        const res = await apiGetJsonData<{
-          roles: string[];
-          fullName: string;
-          phoneE164: string | null;
-        }>("/api/users/me");
+        const res = await fetchUserMeClientCached();
         if (cancelled) return;
+        if (!res) {
+          setRole(null);
+          setMe(null);
+          return;
+        }
         const roles = res.roles;
         const nextRole: AppRole = roles.includes("ADMIN") ? "admin" : roles.includes("DRIVER") ? "driver" : "passenger";
         setRole(nextRole);
@@ -223,6 +224,12 @@ export function PublicHeader() {
     if (!role) {
       return [
         { href: "/", label: t("navHome"), match: (p: string) => p === "/" },
+        { href: "/search", label: t("navSearchRide"), match: (p: string) => p.startsWith("/search") },
+        {
+          href: "/passenger/bookings",
+          label: t("navMyBookings"),
+          match: (p: string) => p.startsWith("/passenger/bookings"),
+        },
         { href: "/#comment-ca-marche", label: t("navHowItWorks"), match: () => false },
         { href: "/safety", label: t("navSafety"), match: (p: string) => p.startsWith("/safety") },
         { href: "/help", label: t("navHelp"), match: (p: string) => p.startsWith("/help") },

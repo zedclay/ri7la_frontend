@@ -36,3 +36,7 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 # ri7la_frontend
+
+## E2E smoke tests (Playwright)
+
+Install dependencies (`npm install`), then browsers: `npx playwright install`. With the dev server running (`npm run dev`), run `npm run test:e2e`. Set `PLAYWRIGHT_BASE_URL` if the app is not on `http://127.0.0.1:3000`.

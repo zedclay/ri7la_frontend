@@ -7,6 +7,7 @@ import { PassengerBookingDetailClient } from "@/components/passenger/PassengerBo
 import { apiGetJsonData } from "@/lib/api";
 import { apiBookingRowToBooking, type ApiBookingRow } from "@/lib/apiBooking";
 import { mockBookings } from "@/lib/mockData";
+import { allowDemoMocks } from "@/lib/runtimeEnv";
 import type { Booking } from "@/lib/types";
 import { getAccessToken } from "@/lib/auth";
 
@@ -22,17 +23,26 @@ export function PassengerBookingDetailContainer({ bookingId }: Props) {
     async function load() {
       setLoading(true);
       try {
-        if (getAccessToken()) {
-          const row = await apiGetJsonData<ApiBookingRow>(`/api/bookings/${encodeURIComponent(bookingId)}`);
-          if (!cancelled) setBooking(apiBookingRowToBooking(row));
+        try {
+          if (getAccessToken()) {
+            const row = await apiGetJsonData<ApiBookingRow>(`/api/bookings/${encodeURIComponent(bookingId)}`);
+            if (!cancelled) setBooking(apiBookingRowToBooking(row));
+            return;
+          }
+        } catch {
+          /* optional demo fallback below */
+        }
+
+        if (allowDemoMocks()) {
+          const mock = mockBookings.find((b) => b.id === bookingId) ?? null;
+          if (!cancelled) setBooking(mock);
           return;
         }
-      } catch {
-        /* fall back to mock */
-      }
 
-      const mock = mockBookings.find((b) => b.id === bookingId) ?? null;
-      if (!cancelled) setBooking(mock);
+        if (!cancelled) setBooking(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
 
     void load();

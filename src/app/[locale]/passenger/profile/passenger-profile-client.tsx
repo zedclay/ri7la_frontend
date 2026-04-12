@@ -5,9 +5,16 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
-import { apiGetJsonData } from "@/lib/api";
+import { apiGetJsonData, apiPostJsonData } from "@/lib/api";
 import { getAccessToken } from "@/lib/auth";
+import { filesToDataUrls } from "@/lib/fileDataUrls";
+import { fetchUserMeClientCached, invalidateUserMeClientCache } from "@/lib/userMeClientCache";
 import { getCurrentDemoUser, updateCurrentDemoUser } from "@/lib/demoSession";
+import {
+  currentUserIdForStorage,
+  loadPassengerIdentity,
+  savePassengerIdentity,
+} from "@/lib/passengerIdentityStorage";
 
 type RemoteMe = {
   fullName: string;
@@ -25,6 +32,9 @@ export function PassengerProfileClient() {
   const [remote, setRemote] = useState<RemoteMe | null>(null);
   const [fullName, setFullName] = useState(() => me?.fullName ?? "");
   const [email, setEmail] = useState(() => me?.email ?? "");
+  const [identityFileNames, setIdentityFileNames] = useState<string[]>([]);
+  const [identityVerified, setIdentityVerified] = useState<boolean | null>(null);
+  const [identityStatus, setIdentityStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (!getAccessToken()) return;
@@ -37,9 +47,19 @@ export function PassengerProfileClient() {
         setEmail((prev) => (prev.trim() ? prev : u.email ?? ""));
       })
       .catch(() => {});
+    void fetchUserMeClientCached().then((me) => {
+      if (cancelled || !me?.passengerVerification) return;
+      setIdentityVerified(me.passengerVerification.identityVerified);
+      setIdentityStatus(me.passengerVerification.identity);
+    });
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  useEffect(() => {
+    const uid = currentUserIdForStorage();
+    if (uid) setIdentityFileNames(loadPassengerIdentity(uid).identityDocumentFileNames);
   }, []);
 
   const displayPhone = remote?.phoneE164 ?? me?.phone ?? "";
@@ -69,6 +89,30 @@ export function PassengerProfileClient() {
         </div>
       ) : null}
 
+      {identityVerified === true ? (
+        <div className="rounded-2xl border border-primary/25 bg-primary-container/15 p-5 text-on-surface">
+          <div className="flex items-center gap-2 font-extrabold text-primary">
+            <MaterialIcon name="verified" className="!text-2xl" />
+            {t("passengerVerificationApproved")}
+          </div>
+          <p className="mt-1 text-sm text-on-surface-variant">{t("passengerVerificationApprovedBody")}</p>
+        </div>
+      ) : identityStatus === "pending" || identityStatus === "rejected" || identityVerified === false ? (
+        <div
+          className={`rounded-2xl p-5 ${
+            identityStatus === "rejected" ? "border border-error/30 bg-error-container/15" : "border border-amber-500/35 bg-amber-500/10"
+          }`}
+        >
+          <div className="flex items-center gap-2 font-extrabold text-on-surface">
+            <MaterialIcon name={identityStatus === "rejected" ? "cancel" : "schedule"} className="!text-2xl text-primary" />
+            {identityStatus === "rejected" ? t("passengerVerificationRejected") : t("passengerVerificationPending")}
+          </div>
+          <p className="mt-1 text-sm text-on-surface-variant">
+            {identityStatus === "rejected" ? t("passengerVerificationRejectedBody") : t("passengerVerificationPendingBody")}
+          </p>
+        </div>
+      ) : null}
+
       {showCompleteBanner ? (
         <div className="rounded-2xl bg-secondary-container/40 p-6 text-on-secondary-fixed-variant">
           <div className="flex items-start gap-3">
@@ -80,6 +124,62 @@ export function PassengerProfileClient() {
           </div>
         </div>
       ) : null}
+
+      <div className="rounded-2xl border border-outline-variant/15 bg-surface-container-lowest p-6 shadow-sm">
+        <div className="mb-4 text-sm font-extrabold text-on-surface">{t("passengerIdentitySection")}</div>
+        <p className="mb-4 text-sm text-on-surface-variant">{t("passengerIdentitySectionBody")}</p>
+        <div className="rounded-xl border border-dashed border-primary/30 bg-surface-container-low/50 p-5">
+          <label className="flex cursor-pointer flex-col gap-2">
+            <input
+              type="file"
+              accept="image/*,.pdf,application/pdf"
+              multiple
+              className="sr-only"
+              onChange={async (e) => {
+                const list = e.target.files;
+                const uid = currentUserIdForStorage();
+                if (!uid) return;
+                if (!list?.length) {
+                  setIdentityFileNames([]);
+                  savePassengerIdentity(uid, { identityDocumentFileNames: [] });
+                  return;
+                }
+                const names = Array.from(list).map((f) => f.name);
+                setIdentityFileNames(names);
+                savePassengerIdentity(uid, { identityDocumentFileNames: names });
+                if (getAccessToken()) {
+                  try {
+                    const urls = await filesToDataUrls(list);
+                    await apiPostJsonData("/api/passengers/me/verification/documents", { identity: urls });
+                    invalidateUserMeClientCache();
+                    const me = await fetchUserMeClientCached();
+                    if (me?.passengerVerification) {
+                      setIdentityVerified(me.passengerVerification.identityVerified);
+                      setIdentityStatus(me.passengerVerification.identity);
+                    }
+                  } catch {
+                    /* ignore */
+                  }
+                }
+              }}
+            />
+            <span className="inline-flex w-fit items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-extrabold text-on-primary">
+              {t("passengerIdentityUpload")}
+            </span>
+          </label>
+          {identityFileNames.length > 0 ? (
+            <ul className="mt-3 space-y-1 text-xs text-on-surface-variant">
+              {identityFileNames.map((n) => (
+                <li key={n} className="truncate font-medium">
+                  {n}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-xs text-on-surface-variant">{t("passengerIdentityEmpty")}</p>
+          )}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="rounded-2xl bg-surface-container-lowest p-6 shadow-sm">

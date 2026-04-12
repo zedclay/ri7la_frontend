@@ -2,15 +2,8 @@ import type { Metadata } from "next";
 import { LocaleHtmlAttributes } from "@/components/i18n/LocaleHtmlAttributes";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
-import { Noto_Sans_Arabic } from "next/font/google";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-
-const notoArabic = Noto_Sans_Arabic({
-  subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -46,7 +39,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <NextIntlClientProvider messages={messages}>
       <LocaleHtmlAttributes />
-      <div className={isRtl ? notoArabic.className : undefined}>{children}</div>
+      <div className={isRtl ? "locale-font-arabic" : undefined}>{children}</div>
     </NextIntlClientProvider>
   );
 }

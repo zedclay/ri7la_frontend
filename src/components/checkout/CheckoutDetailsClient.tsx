@@ -9,6 +9,10 @@ import { checkoutPriceBreakdown } from "@/lib/checkoutPrice";
 import { loadPassengerDraft, savePassengerDraft } from "@/lib/checkoutStorage";
 import { isValidEmail } from "@/lib/emailValidation";
 import type { Booking } from "@/lib/types";
+import { CheckoutOwnTripMessage } from "@/components/checkout/CheckoutOwnTripMessage";
+import { getAccessToken } from "@/lib/auth";
+import { fetchUserMeClientCached } from "@/lib/userMeClientCache";
+import { useIsTripOwner } from "@/lib/useIsTripOwner";
 
 export function CheckoutDetailsClient({ bookingId, booking }: { bookingId: string; booking: Booking }) {
   const t = useTranslations("checkout");
@@ -17,6 +21,8 @@ export function CheckoutDetailsClient({ bookingId, booking }: { bookingId: strin
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [identityBlocked, setIdentityBlocked] = useState(false);
+  const [identityCheckDone, setIdentityCheckDone] = useState(() => getAccessToken() == null);
 
   useEffect(() => {
     const d = loadPassengerDraft(bookingId);
@@ -27,12 +33,46 @@ export function CheckoutDetailsClient({ bookingId, booking }: { bookingId: strin
     }
   }, [bookingId]);
 
+  useEffect(() => {
+    const tok = getAccessToken();
+    if (!tok) {
+      setIdentityBlocked(false);
+      setIdentityCheckDone(true);
+      return;
+    }
+    let cancelled = false;
+    void fetchUserMeClientCached()
+      .then((me) => {
+        if (cancelled || !me) return;
+        if (!me.roles.includes("PASSENGER")) {
+          setIdentityBlocked(false);
+        } else {
+          setIdentityBlocked(me.passengerVerification?.identityVerified !== true);
+        }
+        setIdentityCheckDone(true);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setIdentityBlocked(false);
+          setIdentityCheckDone(true);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const { base, fee, total, currency } = checkoutPriceBreakdown(booking);
   const backHref = booking.contextBackHref ?? "/search";
+  const tripOwnerCheck = useIsTripOwner(booking.tripOwnerUserId);
 
   function handleContinue(e?: React.FormEvent) {
     e?.preventDefault();
     setError(null);
+    if (identityBlocked) {
+      setError(t("identityBlockedBody"));
+      return;
+    }
     if (fullName.trim().length < 2 || !isValidEmail(email) || phone.trim().length < 6) {
       setError(t("validationPassenger"));
       return;
@@ -43,6 +83,42 @@ export function CheckoutDetailsClient({ bookingId, booking }: { bookingId: strin
       phone: phone.trim(),
     });
     router.push(`/passenger/checkout/${bookingId}/payment`);
+  }
+
+  if (booking.tripOwnerUserId && tripOwnerCheck === "pending") {
+    return (
+      <div className="flex min-h-[32vh] items-center justify-center rounded-2xl bg-surface-container-lowest p-12 text-sm font-medium text-on-surface-variant">
+        <MaterialIcon name="progress_activity" className="!text-3xl animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (tripOwnerCheck === true) {
+    return <CheckoutOwnTripMessage booking={booking} />;
+  }
+
+  if (!identityCheckDone) {
+    return (
+      <div className="flex min-h-[32vh] items-center justify-center rounded-2xl bg-surface-container-lowest p-12 text-sm font-medium text-on-surface-variant">
+        {t("identityChecking")}
+      </div>
+    );
+  }
+
+  if (identityBlocked) {
+    return (
+      <div className="mx-auto max-w-lg rounded-2xl border border-error/20 bg-error-container/15 p-8 text-center shadow-sm">
+        <MaterialIcon name="badge" className="mx-auto !text-5xl text-error" />
+        <h1 className="mt-4 font-headline text-2xl font-extrabold text-on-surface">{t("identityBlockedTitle")}</h1>
+        <p className="mt-2 text-sm text-on-surface-variant">{t("identityBlockedBody")}</p>
+        <Link
+          href="/passenger/profile"
+          className="mt-6 inline-flex rounded-full bg-primary px-8 py-3 text-sm font-extrabold text-on-primary shadow-lg"
+        >
+          {t("identityBlockedCta")}
+        </Link>
+      </div>
+    );
   }
 
   return (

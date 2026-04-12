@@ -37,9 +37,18 @@ export function LoginForm({ showError = false, fixedRole }: Props) {
       try {
         const me = await apiGetJsonData<{ roles: string[] }>("/api/users/me");
         if (cancelled) return;
-        if (me.roles.includes("ADMIN")) router.replace(dashboardForRole("admin"));
-        else if (me.roles.includes("DRIVER")) router.replace(dashboardForRole("driver"));
-        else router.replace(dashboardForRole("passenger"));
+        const nextRaw = searchParams.get("next");
+        const next =
+          nextRaw && nextRaw.startsWith("/") && !nextRaw.startsWith("//") && !nextRaw.includes("://")
+            ? nextRaw
+            : null;
+        if (me.roles.includes("ADMIN")) {
+          router.replace(dashboardForRole("admin"));
+        } else if (me.roles.includes("DRIVER")) {
+          router.replace(next?.startsWith("/driver") ? next : dashboardForRole("driver"));
+        } else {
+          router.replace(next ?? dashboardForRole("passenger"));
+        }
       } catch {
         if (cancelled) return;
         clearAuth();
@@ -49,7 +58,7 @@ export function LoginForm({ showError = false, fixedRole }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, searchParams]);
 
   return (
     <div className="w-full max-w-md space-y-8">

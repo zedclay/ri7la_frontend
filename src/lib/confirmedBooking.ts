@@ -31,7 +31,7 @@ export type ConfirmedBookingSnapshot = {
     boardingPointBody?: string;
   };
   passenger: PassengerCheckoutDraft;
-  payment: { method: PaymentMethod; status: "captured" | "not_required" };
+  payment: { method: PaymentMethod; status: "captured" | "not_required" | "pending_review" };
   pricing: { base: number; fee: number; total: number; currency: string };
 };
 
@@ -57,8 +57,12 @@ export function buildConfirmedSnapshot(
   payment: PaymentCheckoutDraft,
   pricing: { base: number; fee: number; total: number; currency: string }
 ): ConfirmedBookingSnapshot {
-  const payStatus: "captured" | "not_required" =
-    booking.mode === "carpool" && payment.method === "cash" ? "not_required" : "captured";
+  const payStatus: "captured" | "not_required" | "pending_review" =
+    payment.method === "baridimob"
+      ? "pending_review"
+      : booking.mode === "carpool" && payment.method === "cash"
+        ? "not_required"
+        : "captured";
 
   return {
     version: 1,
@@ -144,6 +148,14 @@ export function applySnapshotToBooking(b: Booking, s: ConfirmedBookingSnapshot):
     ...b,
     status: "confirmed",
     totalPrice: { currency: "DZD", amount: s.pricing.total },
-    payment: { method: s.payment.method, status: s.payment.status === "not_required" ? "not_required" : "captured" },
+    payment: {
+      method: s.payment.method,
+      status:
+        s.payment.status === "not_required"
+          ? "not_required"
+          : s.payment.status === "pending_review"
+            ? "pending_review"
+            : "captured",
+    },
   };
 }

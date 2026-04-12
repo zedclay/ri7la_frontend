@@ -4,9 +4,12 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { CheckoutOwnTripMessage } from "@/components/checkout/CheckoutOwnTripMessage";
 import { checkoutPriceBreakdown } from "@/lib/checkoutPrice";
 import { loadPassengerDraft, loadPaymentDraft, savePaymentDraft } from "@/lib/checkoutStorage";
+import { filesToDataUrls } from "@/lib/fileDataUrls";
 import type { Booking, PaymentMethod } from "@/lib/types";
+import { useIsTripOwner } from "@/lib/useIsTripOwner";
 
 function modeIcon(mode: Booking["mode"]) {
   if (mode === "bus") return "directions_bus";
@@ -17,8 +20,7 @@ function modeIcon(mode: Booking["mode"]) {
 const METHODS: { key: PaymentMethod; icon: string; labelKey: string }[] = [
   { key: "edahabia", icon: "credit_card", labelKey: "methodEdahabia" },
   { key: "cib", icon: "payment", labelKey: "methodCib" },
-  { key: "bank_transfer", icon: "account_balance", labelKey: "methodBank" },
-  { key: "cash", icon: "payments", labelKey: "methodCash" },
+  { key: "baridimob", icon: "smartphone", labelKey: "methodBaridimob" },
 ];
 
 export function CheckoutPaymentClient({ bookingId, booking }: { bookingId: string; booking: Booking }) {
@@ -26,10 +28,12 @@ export function CheckoutPaymentClient({ bookingId, booking }: { bookingId: strin
   const router = useRouter();
   const [method, setMethod] = useState<PaymentMethod | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [baridimobReceiptName, setBaridimobReceiptName] = useState<string | null>(null);
 
   const { base, fee, total, currency } = checkoutPriceBreakdown(booking);
   const icon = modeIcon(booking.mode);
   const seatTitle = booking.mode === "carpool" ? t("seatCarpool") : t("seatBusTrain");
+  const tripOwnerCheck = useIsTripOwner(booking.tripOwnerUserId);
 
   useEffect(() => {
     if (!loadPassengerDraft(bookingId)) {
@@ -38,7 +42,22 @@ export function CheckoutPaymentClient({ bookingId, booking }: { bookingId: strin
     }
     const p = loadPaymentDraft(bookingId);
     if (p?.method) setMethod(p.method);
+    if (p?.method === "baridimob" && p.baridimobReceiptDataUrl) {
+      setBaridimobReceiptName("receipt");
+    }
   }, [bookingId, router]);
+
+  if (booking.tripOwnerUserId && tripOwnerCheck === "pending") {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center text-on-surface-variant">
+        <MaterialIcon name="progress_activity" className="!text-3xl animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (tripOwnerCheck === true) {
+    return <CheckoutOwnTripMessage booking={booking} />;
+  }
 
   function goConfirm() {
     setError(null);
@@ -46,7 +65,16 @@ export function CheckoutPaymentClient({ bookingId, booking }: { bookingId: strin
       setError(t("selectPayment"));
       return;
     }
-    savePaymentDraft(bookingId, { method });
+    if (method === "baridimob") {
+      const p = loadPaymentDraft(bookingId);
+      if (!p?.baridimobReceiptDataUrl) {
+        setError(t("baridimobNeedReceipt"));
+        return;
+      }
+      savePaymentDraft(bookingId, { method: "baridimob", baridimobReceiptDataUrl: p.baridimobReceiptDataUrl });
+    } else {
+      savePaymentDraft(bookingId, { method });
+    }
     router.push(`/passenger/checkout/${bookingId}/confirm`);
   }
 
@@ -70,7 +98,19 @@ export function CheckoutPaymentClient({ bookingId, booking }: { bookingId: strin
                 <button
                   key={m.key}
                   type="button"
-                  onClick={() => setMethod(m.key)}
+                  onClick={() => {
+                    setMethod(m.key);
+                    if (m.key !== "baridimob") {
+                      setBaridimobReceiptName(null);
+                      savePaymentDraft(bookingId, { method: m.key });
+                    } else {
+                      const cur = loadPaymentDraft(bookingId);
+                      savePaymentDraft(bookingId, {
+                        method: "baridimob",
+                        baridimobReceiptDataUrl: cur?.baridimobReceiptDataUrl,
+                      });
+                    }
+                  }}
                   className={`flex items-center justify-between rounded-2xl border-2 px-5 py-4 text-left transition-all ${
                     active
                       ? "border-primary bg-primary-container/10 shadow-md shadow-primary/10"
@@ -94,6 +134,50 @@ export function CheckoutPaymentClient({ bookingId, booking }: { bookingId: strin
               );
             })}
           </div>
+
+          {method === "baridimob" ? (
+            <div className="mt-6 rounded-2xl border border-primary/25 bg-primary-container/10 p-5">
+              <div className="flex items-start gap-3">
+                <MaterialIcon name="receipt_long" className="!text-2xl shrink-0 text-primary" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-extrabold text-on-surface">{t("baridimobReceiptTitle")}</div>
+                  <p className="mt-1 text-xs text-on-surface-variant">{t("baridimobReceiptBody")}</p>
+                  <label className="mt-4 flex cursor-pointer flex-col gap-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        setError(null);
+                        if (!file) {
+                          setBaridimobReceiptName(null);
+                          savePaymentDraft(bookingId, { method: "baridimob" });
+                          return;
+                        }
+                        try {
+                          const [dataUrl] = await filesToDataUrls([file]);
+                          setBaridimobReceiptName(file.name);
+                          setMethod("baridimob");
+                          savePaymentDraft(bookingId, { method: "baridimob", baridimobReceiptDataUrl: dataUrl });
+                        } catch (err) {
+                          setError(err instanceof Error ? err.message : t("baridimobUploadError"));
+                        }
+                      }}
+                    />
+                    <span className="inline-flex w-fit items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-extrabold text-on-primary shadow-md active:scale-95">
+                      {t("baridimobReceiptUpload")}
+                    </span>
+                  </label>
+                  {baridimobReceiptName ? (
+                    <p className="mt-3 text-xs font-medium text-on-surface">
+                      {t("baridimobReceiptSelected", { name: baridimobReceiptName })}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           {error ? (
             <div className="mt-4 rounded-xl bg-error-container px-4 py-3 text-sm font-semibold text-on-error-container">
@@ -150,15 +234,17 @@ export function CheckoutPaymentClient({ bookingId, booking }: { bookingId: strin
             </p>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-dashed border-outline-variant/30 bg-surface-container-low p-6">
-            <div className="flex items-start gap-3">
-              <MaterialIcon name="info" className="!text-xl text-primary" />
-              <div>
-                <div className="text-sm font-bold text-on-surface">{t("bankTransferHintTitle")}</div>
-                <div className="mt-1 text-sm text-on-surface-variant">{t("bankTransferHintBody")}</div>
+          {method === "baridimob" ? (
+            <div className="mt-6 rounded-2xl border border-dashed border-outline-variant/30 bg-surface-container-low p-6">
+              <div className="flex items-start gap-3">
+                <MaterialIcon name="schedule" className="!text-xl text-primary" />
+                <div>
+                  <div className="text-sm font-bold text-on-surface">{t("baridimobPendingTitle")}</div>
+                  <div className="mt-1 text-sm text-on-surface-variant">{t("baridimobPendingBody")}</div>
+                </div>
               </div>
             </div>
-          </div>
+          ) : null}
 
           <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
             {[

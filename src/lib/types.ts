@@ -85,11 +85,13 @@ export type BookingStatus =
   | "cancelled"
   | "completed";
 
-export type PaymentMethod = "cash" | "edahabia" | "cib" | "bank_transfer";
+/** Active checkout methods: edahabia, cib, baridimob. `cash` / `bank_transfer` kept for legacy snapshots only. */
+export type PaymentMethod = "edahabia" | "cib" | "baridimob" | "cash" | "bank_transfer";
 
 export type PaymentStatus =
   | "not_required"
   | "pending"
+  | "pending_review"
   | "captured"
   | "failed"
   | "refunded"
@@ -129,6 +131,8 @@ export type Booking = {
   boardingPointBody?: string;
   /** Link for “back to trip” during checkout demo */
   contextBackHref?: string;
+  /** Set when checkout session is tied to an API trip — used to hide booking for the driver/owner. */
+  tripOwnerUserId?: string | null;
 };
 
 export type Review = {

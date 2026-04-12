@@ -54,8 +54,20 @@ export default async function CarpoolTripPage({ params }: Props) {
       priceAmount: number;
       priceCurrency: "DZD";
       allowInstantBooking: boolean;
+      driverNote: string | null;
+      tripRules: string | null;
+      womenOnly: boolean;
       owner: { id: string; fullName: string } | null;
-      carpoolDetails: { carMake: string; carModel: string; carColor: string | null; plateNumber: string | null } | null;
+      carpoolDetails: {
+        carMake: string;
+        carModel: string;
+        carColor: string | null;
+        plateNumber: string | null;
+        luggagePolicy: string;
+        smokingAllowed: boolean;
+        petsAllowed: boolean;
+        amenities: string[];
+      } | null;
     };
   };
   const t = payload.data;
@@ -63,10 +75,12 @@ export default async function CarpoolTripPage({ params }: Props) {
   const arr = t.arrivalAt ? new Date(t.arrivalAt) : null;
   const hhmm = (d: Date) => d.toISOString().slice(11, 16);
   const dateLabel = dep.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  const durationLabel =
+  const durationHoursApprox =
     arr && Number.isFinite(arr.getTime())
-      ? `${Math.max(0, Math.round((arr.getTime() - dep.getTime()) / 60000 / 60))}h`
-      : "—";
+      ? Math.max(1, Math.round((arr.getTime() - dep.getTime()) / 3_600_000))
+      : null;
+  const durationLabel =
+    durationHoursApprox != null ? `${durationHoursApprox}h` : "—";
   const coverImageUrl = coverForCarMake(t.carpoolDetails?.carMake ?? null);
 
   return (
@@ -91,6 +105,7 @@ export default async function CarpoolTripPage({ params }: Props) {
             departureTime: hhmm(dep),
             arrivalTime: arr ? hhmm(arr) : hhmm(new Date(dep.getTime() + 4 * 60 * 60 * 1000)),
             durationLabel,
+            durationHoursApprox,
             seatsAvailable: t.seatsAvailable,
             seatsTotal: t.seatsTotal,
             driverName: t.owner?.fullName ?? "Driver",
@@ -100,6 +115,13 @@ export default async function CarpoolTripPage({ params }: Props) {
             plateNumber: t.carpoolDetails?.plateNumber ?? null,
             originName: t.originName,
             destinationName: t.destinationName,
+            luggagePolicy: t.carpoolDetails?.luggagePolicy ?? "MEDIUM",
+            smokingAllowed: t.carpoolDetails?.smokingAllowed ?? false,
+            petsAllowed: t.carpoolDetails?.petsAllowed ?? false,
+            womenOnly: t.womenOnly ?? false,
+            driverNote: t.driverNote ?? null,
+            tripRules: t.tripRules ?? null,
+            amenities: Array.isArray(t.carpoolDetails?.amenities) ? t.carpoolDetails!.amenities : [],
           }}
         />
         <div className="lg:col-span-4">
@@ -109,6 +131,7 @@ export default async function CarpoolTripPage({ params }: Props) {
             seatsAvailable={t.seatsAvailable}
             instantBooking={t.allowInstantBooking}
             checkoutHref={`/passenger/checkout/${t.id}/details`}
+            tripOwnerUserId={t.owner?.id ?? null}
           />
         </div>
       </div>

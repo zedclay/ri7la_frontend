@@ -128,6 +128,7 @@ export function tripApiRowToBooking(t: TripApiRow): Booking {
           ? "Arrive 45 minutes early for security check. Have your ID and e-ticket QR ready."
           : "Arrive at least 30 minutes before departure. Present your digital ticket at the assigned platform.",
     contextBackHref: mode === "carpool" ? `/carpool/${t.id}` : mode === "bus" ? `/bus/${t.id}` : `/train/${t.id}`,
+    tripOwnerUserId: t.owner?.id ?? null,
   };
 
   return base;

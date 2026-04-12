@@ -42,7 +42,12 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full font-body text-on-surface-variant">{children}</body>
+      <body
+        className="min-h-full font-body text-on-surface-variant"
+        suppressHydrationWarning
+      >
+        {children}
+      </body>
     </html>
   );
 }

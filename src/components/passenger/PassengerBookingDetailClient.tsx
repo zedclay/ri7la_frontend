@@ -1,6 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { loadConfirmedSnapshot, type ConfirmedBookingSnapshot } from "@/lib/confirmedBooking";
@@ -31,6 +32,7 @@ function paymentMethodLabel(m: PaymentMethod): string {
   const map: Record<PaymentMethod, string> = {
     edahabia: "Edahabia",
     cib: "CIB",
+    baridimob: "Baridi Mob",
     bank_transfer: "Bank / CCP",
     cash: "Cash",
   };
@@ -40,6 +42,7 @@ function paymentMethodLabel(m: PaymentMethod): string {
 type Props = { bookingId: string; booking: Booking };
 
 export function PassengerBookingDetailClient({ bookingId, booking }: Props) {
+  const tMsg = useTranslations("messaging");
   const [snapshot, setSnapshot] = useState<ConfirmedBookingSnapshot | null>(null);
   const checkoutTripId = booking.tripId ?? bookingId;
 
@@ -226,6 +229,19 @@ export function PassengerBookingDetailClient({ bookingId, booking }: Props) {
             <MaterialIcon name="print" className="!text-xl" />
             Print Ticket
           </button>
+
+          {booking.mode === "carpool" &&
+          (booking.status === "requested" ||
+            booking.status === "awaiting_approval" ||
+            booking.status === "confirmed") ? (
+            <Link
+              href={`/passenger/messages?booking=${encodeURIComponent(bookingId)}`}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border-2 border-primary/30 bg-primary-container/15 py-3 text-sm font-extrabold text-primary-container active:scale-[0.99]"
+            >
+              <MaterialIcon name="chat" className="!text-xl" />
+              {tMsg("ctaMessageDriver")}
+            </Link>
+          ) : null}
 
           <div className="mt-6 rounded-xl bg-secondary-container/30 p-4">
             <div className="flex items-start gap-3">

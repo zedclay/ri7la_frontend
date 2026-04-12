@@ -10,6 +10,8 @@ export type PassengerCheckoutDraft = {
 
 export type PaymentCheckoutDraft = {
   method: PaymentMethod;
+  /** Baridimob transfer receipt (data URL) — required when method is baridimob */
+  baridimobReceiptDataUrl?: string;
 };
 
 function passengerKey(bookingId: string) {
@@ -47,7 +49,11 @@ export function loadPassengerDraft(bookingId: string): PassengerCheckoutDraft | 
 export function savePaymentDraft(bookingId: string, draft: PaymentCheckoutDraft) {
   if (typeof window === "undefined") return;
   try {
-    sessionStorage.setItem(paymentKey(bookingId), JSON.stringify(draft));
+    const payload: Record<string, unknown> = { method: draft.method };
+    if (draft.method === "baridimob" && draft.baridimobReceiptDataUrl) {
+      payload.baridimobReceiptDataUrl = draft.baridimobReceiptDataUrl;
+    }
+    sessionStorage.setItem(paymentKey(bookingId), JSON.stringify(payload));
   } catch {
     /* ignore */
   }
@@ -58,9 +64,12 @@ export function loadPaymentDraft(bookingId: string): PaymentCheckoutDraft | null
   try {
     const raw = sessionStorage.getItem(paymentKey(bookingId));
     if (!raw) return null;
-    const j = JSON.parse(raw) as { method?: PaymentMethod };
+    const j = JSON.parse(raw) as { method?: PaymentMethod; baridimobReceiptDataUrl?: string };
     if (!j.method) return null;
-    return { method: j.method };
+    return {
+      method: j.method,
+      baridimobReceiptDataUrl: typeof j.baridimobReceiptDataUrl === "string" ? j.baridimobReceiptDataUrl : undefined,
+    };
   } catch {
     return null;
   }

@@ -76,6 +76,11 @@ body {
   color: var(--stitch-on-surface-variant);
 }
 
+/* Arabic locale: use Noto variable from root layout (avoid second next/font download in [locale]/layout). */
+.locale-font-arabic {
+  font-family: var(--font-noto-arabic), ui-sans-serif, system-ui, sans-serif;
+}
+
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
   font-weight: normal;

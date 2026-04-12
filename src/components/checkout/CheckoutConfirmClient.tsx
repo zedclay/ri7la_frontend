@@ -13,9 +13,12 @@ import {
   type PassengerCheckoutDraft,
   type PaymentCheckoutDraft,
 } from "@/lib/checkoutStorage";
+import { CheckoutOwnTripMessage } from "@/components/checkout/CheckoutOwnTripMessage";
 import { buildConfirmedSnapshot, saveConfirmedSnapshot } from "@/lib/confirmedBooking";
 import { apiPostJsonData } from "@/lib/api";
+import { getAccessToken } from "@/lib/auth";
 import type { Booking, PaymentMethod } from "@/lib/types";
+import { useIsTripOwner } from "@/lib/useIsTripOwner";
 
 const TRIP_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -23,6 +26,7 @@ function methodLabel(method: PaymentMethod, t: (k: string) => string) {
   const keys: Record<PaymentMethod, string> = {
     edahabia: "methodEdahabia",
     cib: "methodCib",
+    baridimob: "methodBaridimob",
     bank_transfer: "methodBank",
     cash: "methodCash",
   };
@@ -34,6 +38,9 @@ export function CheckoutConfirmClient({ bookingId, booking }: { bookingId: strin
   const router = useRouter();
   const [passenger, setPassenger] = useState<PassengerCheckoutDraft | null>(null);
   const [payment, setPayment] = useState<PaymentCheckoutDraft | null>(null);
+  const [finalizeError, setFinalizeError] = useState<string | null>(null);
+  const [finalizing, setFinalizing] = useState(false);
+  const tripOwnerCheck = useIsTripOwner(booking.tripOwnerUserId);
 
   const { base, fee, total, currency } = checkoutPriceBreakdown(booking);
 
@@ -50,31 +57,79 @@ export function CheckoutConfirmClient({ bookingId, booking }: { bookingId: strin
 
   async function finalize() {
     if (!passenger || !payment) return;
+    setFinalizeError(null);
     const tripId = booking.tripId ?? bookingId;
-    if (TRIP_ID_RE.test(tripId)) {
-      try {
-        await apiPostJsonData<{ id: string }>("/api/bookings", {
-          tripId,
-          seats: Math.max(1, booking.seatsCount ?? 1),
-        });
-      } catch {
-        /* Trip may already be booked or demo mock id — still save local ticket snapshot */
-      }
-    }
-    const snapshot = buildConfirmedSnapshot(bookingId, booking, passenger, payment, {
-      base,
-      fee,
-      total,
-      currency,
-    });
+    let serverBookingId: string | null = null;
+    const authed = !!getAccessToken();
+
+    setFinalizing(true);
     try {
-      saveConfirmedSnapshot(snapshot);
-      sessionStorage.setItem(`ri7la_success_passenger_${bookingId}`, passenger.fullName);
-    } catch {
-      /* ignore */
+      if (TRIP_ID_RE.test(tripId) && authed) {
+        try {
+          const created = await apiPostJsonData<{ id: string }>("/api/bookings", {
+            tripId,
+            seats: Math.max(1, booking.seatsCount ?? 1),
+          });
+          serverBookingId = created?.id ?? null;
+          if (!serverBookingId) {
+            setFinalizeError(t("bookingServerFailedGeneric"));
+            return;
+          }
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : "";
+          setFinalizeError(msg ? t("bookingServerFailed", { message: msg }) : t("bookingServerFailedGeneric"));
+          return;
+        }
+      }
+
+      if (serverBookingId && authed) {
+        try {
+          if (payment.method === "edahabia") {
+            await apiPostJsonData("/api/payments", { bookingId: serverBookingId, provider: "EDAHABIA" });
+          } else if (payment.method === "cib") {
+            await apiPostJsonData("/api/payments", { bookingId: serverBookingId, provider: "CIB" });
+          } else if (payment.method === "baridimob") {
+            const proof = payment.baridimobReceiptDataUrl;
+            if (!proof) throw new Error("missing receipt");
+            await apiPostJsonData("/api/payments", {
+              bookingId: serverBookingId,
+              provider: "BARIDIMOB",
+              proofDataUrl: proof,
+            });
+          }
+        } catch {
+          /* Payment API optional when backend offline — booking row still exists */
+        }
+      }
+      const snapshot = buildConfirmedSnapshot(bookingId, booking, passenger, payment, {
+        base,
+        fee,
+        total,
+        currency,
+      });
+      try {
+        saveConfirmedSnapshot(snapshot);
+        sessionStorage.setItem(`ri7la_success_passenger_${bookingId}`, passenger.fullName);
+      } catch {
+        /* ignore */
+      }
+      clearCheckoutDrafts(bookingId);
+      router.push(`/passenger/checkout/${bookingId}/success`);
+    } finally {
+      setFinalizing(false);
     }
-    clearCheckoutDrafts(bookingId);
-    router.push(`/passenger/checkout/${bookingId}/success`);
+  }
+
+  if (booking.tripOwnerUserId && tripOwnerCheck === "pending") {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center text-on-surface-variant">
+        <MaterialIcon name="progress_activity" className="!text-3xl animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (tripOwnerCheck === true) {
+    return <CheckoutOwnTripMessage booking={booking} />;
   }
 
   if (!passenger || !payment) {
@@ -115,6 +170,17 @@ export function CheckoutConfirmClient({ bookingId, booking }: { bookingId: strin
             <div className="rounded-2xl bg-surface-container-low p-6">
               <div className="mb-2 text-xs font-bold uppercase tracking-widest text-on-surface-variant">{t("paymentMethod")}</div>
               <div className="text-lg font-extrabold text-on-surface">{methodLabel(payment.method, t)}</div>
+              {payment.method === "baridimob" && payment.baridimobReceiptDataUrl ? (
+                <div className="mt-3">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{t("baridimobReceiptTitle")}</div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={payment.baridimobReceiptDataUrl}
+                    alt=""
+                    className="mt-2 max-h-40 w-full max-w-xs rounded-xl border border-outline-variant/20 object-contain"
+                  />
+                </div>
+              ) : null}
               <div className="mt-4 border-t border-outline-variant/20 pt-4">
                 <div className="flex justify-between text-lg font-extrabold text-on-surface">
                   <span>{t("total")}</span>
@@ -149,12 +215,23 @@ export function CheckoutConfirmClient({ bookingId, booking }: { bookingId: strin
       <aside className="space-y-6">
         <div className="rounded-2xl bg-surface-container-lowest p-6 shadow-sm lg:sticky lg:top-36">
           <div className="mb-4 text-sm font-bold text-on-surface">{t("confirmSidebarTitle")}</div>
+          {!getAccessToken() && TRIP_ID_RE.test(booking.tripId ?? bookingId) ? (
+            <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-xs font-semibold text-on-surface">
+              {t("bookingOfflineHint")}
+            </div>
+          ) : null}
+          {finalizeError ? (
+            <div className="mb-4 rounded-xl border border-error/30 bg-error-container/20 px-4 py-3 text-xs font-semibold text-on-error-container" role="alert">
+              {finalizeError}
+            </div>
+          ) : null}
           <button
             type="button"
+            disabled={finalizing}
             onClick={() => void finalize()}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-4 text-sm font-bold text-on-primary shadow-lg shadow-primary/10 active:scale-[0.99]"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-4 text-sm font-bold text-on-primary shadow-lg shadow-primary/10 active:scale-[0.99] disabled:opacity-50"
           >
-            {t("completeBooking")}
+            {finalizing ? t("finalizing") : t("completeBooking")}
             <MaterialIcon name="check" className="!text-xl" />
           </button>
           <Link
