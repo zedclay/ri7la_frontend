@@ -4,20 +4,22 @@ import { Link } from "@/i18n/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { getCurrentDemoUser, setDemoSession, updateCurrentDemoUser } from "@/lib/demoSession";
+import { useTranslations } from "next-intl";
 
 export default function BecomeDriverPage() {
   const router = useRouter();
+  const t = useTranslations("becomeDriver");
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
       <div className="rounded-3xl bg-primary-container p-10 text-white shadow-sm">
         <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-extrabold uppercase tracking-widest">
           <MaterialIcon name="verified_user" className="!text-lg" />
-          Become a Driver
+          {t("kicker")}
         </div>
-        <h1 className="font-headline text-4xl font-extrabold tracking-tight">Publish trips across Algeria</h1>
+        <h1 className="font-headline text-4xl font-extrabold tracking-tight">{t("title")}</h1>
         <p className="mt-3 max-w-2xl text-white/80">
-          Complete verification, add your vehicle, then publish routes. You&apos;ll receive booking requests and messages from passengers.
+          {t("subtitle")}
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <button
@@ -34,22 +36,22 @@ export default function BecomeDriverPage() {
               router.push("/driver/onboarding");
             }}
           >
-            Start Driver Onboarding
+            {t("ctaPrimary")}
           </button>
           <Link
             href="/help"
             className="rounded-full bg-white/10 px-7 py-3 text-sm font-extrabold text-white active:scale-95"
           >
-            Learn More
+            {t("ctaSecondary")}
           </Link>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {[
-          { icon: "badge", title: "Identity Verification", desc: "Upload your ID and driver license." },
-          { icon: "directions_car", title: "Vehicle Info", desc: "Add car details and insurance." },
-          { icon: "route", title: "Publish Trips", desc: "Set pickup/drop-off and pricing." },
+          { icon: "badge", title: t("card1Title"), desc: t("card1Body") },
+          { icon: "directions_car", title: t("card2Title"), desc: t("card2Body") },
+          { icon: "route", title: t("card3Title"), desc: t("card3Body") },
         ].map((c) => (
           <div key={c.title} className="rounded-2xl bg-surface-container-lowest p-6 shadow-sm">
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-surface-container-low">

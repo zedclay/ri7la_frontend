@@ -9,7 +9,7 @@ export const mockSearchResults: SearchResult[] = [
     id: "demo-ahmed",
     mode: "carpool",
     coverImageUrl:
-      "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=900&q=80",
     fromLabel: "Algiers (Kharouba)",
     toLabel: "Oran (El Bahia)",
     pickupLabel: "Pickup: Sogral — Caroubier terminal",
@@ -67,7 +67,7 @@ export const mockSearchResults: SearchResult[] = [
     id: "demo-meriem",
     mode: "carpool",
     coverImageUrl:
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=900&q=80",
     fromLabel: "Algiers Center",
     toLabel: "Oran Center",
     pickupLabel: "Pickup: Algiers Center",

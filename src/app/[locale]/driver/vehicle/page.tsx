@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import Image from "next/image";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { getCurrentDemoUser, updateCurrentDemoUser } from "@/lib/demoSession";
+import { useTranslations } from "next-intl";
 
 function readFilesAsDataUrls(files: FileList): Promise<string[]> {
   const arr = Array.from(files);
@@ -21,6 +22,7 @@ function readFilesAsDataUrls(files: FileList): Promise<string[]> {
 }
 
 export default function DriverVehicleInfoPage() {
+  const t = useTranslations("common");
   const me = getCurrentDemoUser();
   const [carMake, setCarMake] = useState(() => me?.carMake ?? "Dacia");
   const [carModel, setCarModel] = useState(() => me?.carModel ?? "Logan");
@@ -73,22 +75,22 @@ export default function DriverVehicleInfoPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-8">
       <div>
-        <h1 className="font-headline text-3xl font-extrabold text-on-surface">Vehicle Info</h1>
+        <h1 className="font-headline text-3xl font-extrabold text-on-surface">{t("vehicleInfoTitle")}</h1>
         <p className="mt-1 text-on-surface-variant">
-          Manage your vehicle details and add several photos (insurance, registration, etc. stay in Documents below).
+          {t("vehicleInfoSubtitle")}
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="rounded-2xl bg-surface-container-lowest p-6 shadow-sm lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
-            <div className="text-sm font-extrabold text-on-surface">Primary vehicle</div>
+            <div className="text-sm font-extrabold text-on-surface">{t("vehiclePrimary")}</div>
             <button
               type="button"
               className="text-xs font-bold text-primary underline underline-offset-4"
               onClick={() => persistVehicle(carImageUrls)}
             >
-              Save
+              {t("save")}
             </button>
           </div>
 
@@ -132,30 +134,30 @@ export default function DriverVehicleInfoPage() {
             <div className="p-6">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Make</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{t("vehicleMake")}</div>
                   <input
                     value={carMake}
                     onChange={(e) => setCarMake(e.target.value)}
                     className="mt-2 w-full rounded-xl border-none bg-white/70 px-4 py-3 text-sm font-extrabold text-on-surface outline-none focus:ring-2 focus:ring-primary/20"
-                    placeholder="Dacia"
+                    placeholder={t("vehicleMakePlaceholder")}
                   />
                 </div>
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Model</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{t("vehicleModel")}</div>
                   <input
                     value={carModel}
                     onChange={(e) => setCarModel(e.target.value)}
                     className="mt-2 w-full rounded-xl border-none bg-white/70 px-4 py-3 text-sm font-extrabold text-on-surface outline-none focus:ring-2 focus:ring-primary/20"
-                    placeholder="Logan"
+                    placeholder={t("vehicleModelPlaceholder")}
                   />
                 </div>
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Color</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{t("vehicleColor")}</div>
                   <input
                     value={carColor}
                     onChange={(e) => setCarColor(e.target.value)}
                     className="mt-2 w-full rounded-xl border-none bg-white/70 px-4 py-3 text-sm font-extrabold text-on-surface outline-none focus:ring-2 focus:ring-primary/20"
-                    placeholder="White"
+                    placeholder={t("vehicleColorPlaceholder")}
                   />
                 </div>
                 <div>

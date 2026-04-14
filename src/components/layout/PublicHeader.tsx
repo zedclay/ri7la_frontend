@@ -8,7 +8,8 @@ import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { clearAuth, getAuthTokens } from "@/lib/auth";
 import { fetchUserMeClientCached } from "@/lib/userMeClientCache";
 
-type NavItem = { href: string; label: string; match: (p: string) => boolean };
+type LinkHref = React.ComponentProps<typeof Link>["href"];
+type NavItem = { href: LinkHref; label: string; match: (p: string) => boolean };
 
 type AppRole = "passenger" | "driver" | "admin";
 
@@ -136,8 +137,12 @@ function MobileMenu({
         aria-label={t("closeMenu")}
         onClick={onClose}
       />
-      <div className="absolute end-0 top-0 h-full w-[320px] max-w-[90vw] bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-outline-variant/20 px-5 py-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="absolute end-0 top-0 h-[100dvh] w-[320px] max-w-[90vw] bg-white shadow-2xl"
+      >
+        <div className="flex items-center justify-between border-b border-outline-variant/20 px-5 pb-4 pt-[calc(env(safe-area-inset-top)+1rem)]">
           <div className="font-headline text-lg font-extrabold text-primary-container">{t("menu")}</div>
           <button
             type="button"
@@ -148,11 +153,13 @@ function MobileMenu({
             <MaterialIcon name="close" className="!text-xl" />
           </button>
         </div>
-        <div className="p-5">
+        <div className="h-[calc(100dvh-72px-env(safe-area-inset-top))] overflow-y-auto px-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-5">
           <nav className="space-y-2" aria-label={t("mobileNav")}>
-            {nav.map((item) => (
+            {nav.map((item) => {
+              const key = typeof item.href === "string" ? item.href : `${item.href.pathname}${item.href.hash ? `#${item.href.hash}` : ""}`;
+              return (
               <Link
-                key={item.href}
+                key={key}
                 href={item.href}
                 onClick={onClose}
                 className="flex items-center justify-between rounded-2xl bg-surface-container-low px-4 py-4 text-sm font-extrabold text-on-surface"
@@ -160,7 +167,8 @@ function MobileMenu({
                 {item.label}
                 <MaterialIcon name="chevron_right" className="!text-xl text-outline rtl:rotate-180" />
               </Link>
-            ))}
+              );
+            })}
           </nav>
           <div className="mt-6 rounded-2xl bg-surface-container-low p-4">{right}</div>
         </div>
@@ -172,10 +180,24 @@ function MobileMenu({
 export function PublicHeader() {
   const t = useTranslations("common");
   const router = useRouter();
-  const pathname = usePathname();
+  const rawPathname = usePathname();
+  const pathname = rawPathname.replace(/^\/(fr|ar)(?=\/|$)/, "") || "/";
   const [mobileOpen, setMobileOpen] = useState(false);
   const [role, setRole] = useState<AppRole | null>(null);
   const [me, setMe] = useState<{ fullName?: string | null; phoneE164?: string | null } | null>(null);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (!mobileOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    const prevTouchAction = document.body.style.touchAction;
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.touchAction = prevTouchAction;
+    };
+  }, [mobileOpen]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -224,13 +246,8 @@ export function PublicHeader() {
     if (!role) {
       return [
         { href: "/", label: t("navHome"), match: (p: string) => p === "/" },
+        { href: { pathname: "/", hash: "comment-ca-marche" }, label: t("navHowItWorks"), match: () => false },
         { href: "/search", label: t("navSearchRide"), match: (p: string) => p.startsWith("/search") },
-        {
-          href: "/passenger/bookings",
-          label: t("navMyBookings"),
-          match: (p: string) => p.startsWith("/passenger/bookings"),
-        },
-        { href: "/#comment-ca-marche", label: t("navHowItWorks"), match: () => false },
         { href: "/safety", label: t("navSafety"), match: (p: string) => p.startsWith("/safety") },
         { href: "/help", label: t("navHelp"), match: (p: string) => p.startsWith("/help") },
       ];
@@ -360,25 +377,26 @@ export function PublicHeader() {
   return (
     <>
       <header className="fixed top-0 z-50 w-full border-b border-outline-variant/20 bg-white/85 font-headline shadow-sm backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-6 py-4">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
-            <div className="flex items-center">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="flex h-[72px] items-center justify-between gap-12">
+            <div className="flex items-center gap-3">
               <Link href="/" className="text-2xl font-extrabold tracking-tight text-primary-container">
                 Ri7la
               </Link>
             </div>
 
-            <nav className="hidden items-center justify-center gap-8 md:flex" aria-label={t("mainNav")}>
+            <nav className="hidden flex-1 items-center justify-center gap-6 md:flex" aria-label={t("mainNav")}>
               {nav.map((item) => {
+                const key = typeof item.href === "string" ? item.href : `${item.href.pathname}${item.href.hash ? `#${item.href.hash}` : ""}`;
                 const active = item.match(pathname);
                 return (
                   <Link
-                    key={item.href}
+                    key={key}
                     href={item.href}
                     className={
                       active
-                        ? "border-b-2 border-primary-container pb-1 text-sm font-extrabold text-primary-container"
-                        : "text-sm font-semibold text-on-surface-variant transition-colors hover:text-primary-container"
+                        ? "inline-flex h-10 items-center border-b-2 border-primary-container px-2 text-sm font-extrabold text-primary-container"
+                        : "inline-flex h-10 items-center px-2 text-sm font-semibold text-on-surface-variant transition-colors hover:text-primary-container"
                     }
                   >
                     {item.label}
@@ -387,21 +405,21 @@ export function PublicHeader() {
               })}
             </nav>
 
-            <div className="flex items-center justify-end gap-3">
-              <div className="hidden items-center gap-3 md:flex">
+            <div className="flex items-center gap-5">
+              <div className="hidden items-center gap-5 md:flex">
                 <LocaleSwitcher variant="header" />
 
                 {!role ? (
                   <>
                     <Link
                       href="/auth/login"
-                      className="px-3 py-2 text-sm font-extrabold text-primary-container transition-colors hover:text-primary active:scale-95"
+                      className="inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-extrabold text-primary-container transition-colors hover:bg-surface-container-low hover:text-primary active:scale-95"
                     >
                       {t("logIn")}
                     </Link>
                     <Link
                       href="/auth/signup"
-                      className="rounded-full bg-primary px-6 py-2.5 text-sm font-extrabold text-on-primary shadow-lg shadow-primary/10 active:scale-95"
+                      className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-6 text-sm font-extrabold text-on-primary shadow-lg shadow-primary/10 active:scale-95"
                     >
                       {t("signUp")}
                     </Link>
@@ -410,7 +428,7 @@ export function PublicHeader() {
                   <>
                     <Link
                       href="/passenger/become-driver"
-                      className="rounded-full bg-surface-container-low px-4 py-2 text-sm font-extrabold text-on-surface transition-colors hover:bg-surface-container-high"
+                      className="inline-flex h-10 items-center justify-center rounded-full bg-surface-container-low px-4 text-sm font-extrabold text-on-surface transition-colors hover:bg-surface-container-high"
                     >
                       {t("becomeDriverCta")}
                     </Link>
@@ -427,7 +445,7 @@ export function PublicHeader() {
                   <>
                     <Link
                       href="/driver/trips/new"
-                      className="rounded-full bg-primary px-5 py-2 text-sm font-extrabold text-on-primary shadow-lg shadow-primary/10"
+                      className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-5 text-sm font-extrabold text-on-primary shadow-lg shadow-primary/10"
                     >
                       {t("publishTrip")}
                     </Link>
@@ -444,13 +462,13 @@ export function PublicHeader() {
                   <>
                     <Link
                       href={dashboardForRole("admin")}
-                      className="rounded-full bg-primary px-5 py-2 text-sm font-extrabold text-on-primary shadow-lg shadow-primary/10"
+                      className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-5 text-sm font-extrabold text-on-primary shadow-lg shadow-primary/10"
                     >
                       {t("adminConsole")}
                     </Link>
                     <button
                       type="button"
-                      className="px-3 py-2 text-sm font-extrabold text-error transition-colors hover:text-error/80"
+                      className="inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-extrabold text-error transition-colors hover:bg-error-container/30 hover:text-error/80"
                       onClick={() => {
                         clearAuth();
                         router.push("/auth/login");

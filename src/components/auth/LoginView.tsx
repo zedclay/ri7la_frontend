@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { AuthTransactionFooter } from "./AuthTransactionFooter";
 import { LoginForm } from "./LoginForm";
+import { useTranslations } from "next-intl";
 
 const BUS_HERO_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuC91OoK2KWmtL6vymbTKHK4HSEcoXGVRUYs2SHNLE2Ss4dBlfNs-jyoWAB8rTdS4OTnutswIZvX0YzgMrggcAfqtTe7X4ranbT-wtZpydB5qWY_aw8NPyEoQYcysr-EI_rZAryZrys8CJ0r3li5E5WI700KGS2vYmAZu-e7bjQ9sTF6wfXRBp9IOw3ied_FZn1PmEBag3aV8PZMAeqkQf3_ImINUtnvs2fTGiM6iAroQkFDmwWVF_1sOpC34bsE6nk1k-qbLHRzhjdd";
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function LoginView({ showAuthError = false }: Props) {
+  const t = useTranslations("common");
   return (
     <>
       <main className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
@@ -39,11 +41,10 @@ export function LoginView({ showAuthError = false }: Props) {
             </Link>
             <div className="max-w-xl">
               <h2 className="mb-6 font-headline text-5xl font-bold leading-tight text-white lg:text-6xl">
-                Welcome back
+                {t("loginHeroTitle")}
               </h2>
               <p className="max-w-md font-body text-xl leading-relaxed text-white/90">
-                Your trusted companion for navigating Algeria. Reconnect with your journeys,
-                schedules, and companions in one click.
+                {t("loginHeroSubtitle")}
               </p>
             </div>
             <div className="flex gap-4">

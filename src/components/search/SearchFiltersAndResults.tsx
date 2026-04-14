@@ -115,14 +115,14 @@ function mapCarpoolRows(rows: TripSearchRow[]): SearchResult[] {
     const dep = new Date(t.departureAt);
     const arr = t.arrivalAt ? new Date(t.arrivalAt) : null;
     const hhmm = (d: Date) => d.toISOString().slice(11, 16);
-    const dateLabel = dep.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const dateLabel = dep.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
     const durationLabel =
       arr && Number.isFinite(arr.getTime())
         ? formatDurationFromMs(arr.getTime() - dep.getTime())
         : "—";
     const vehicleLabel = t.carpoolDetails
       ? `${t.carpoolDetails.carMake} ${t.carpoolDetails.carModel}${t.carpoolDetails.carColor ? ` • ${t.carpoolDetails.carColor}` : ""}`
-      : "Car";
+      : "";
     const coverImageUrl = t.coverImageUrl?.trim() || coverForCarMake(t.carpoolDetails?.carMake ?? null);
 
     return {
@@ -131,15 +131,15 @@ function mapCarpoolRows(rows: TripSearchRow[]): SearchResult[] {
       coverImageUrl,
       fromLabel: t.originName,
       toLabel: t.destinationName,
-      pickupLabel: `Pickup: ${t.originName}`,
-      dropoffLabel: `Drop-off: ${t.destinationName}`,
+      pickupLabel: t.originName,
+      dropoffLabel: t.destinationName,
       departureTime: hhmm(dep),
       arrivalTime: arr ? hhmm(arr) : hhmm(new Date(dep.getTime() + 4 * 60 * 60 * 1000)),
       durationLabel,
       dateLabel,
       pricePerSeat: { currency: "DZD", amount: t.priceAmount },
       seatsLeft: t.seatsAvailable,
-      driverName: t.owner?.fullName ?? "Driver",
+      driverName: t.owner?.fullName ?? "",
       driverRating: 4.7,
       vehicleLabel,
       luggageIncluded: true,
@@ -154,13 +154,13 @@ function mapBusRows(rows: TripSearchRow[]): SearchResult[] {
     const dep = new Date(t.departureAt);
     const arr = t.arrivalAt ? new Date(t.arrivalAt) : null;
     const hhmm = (d: Date) => d.toISOString().slice(11, 16);
-    const dateLabel = dep.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const dateLabel = dep.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
     const durationLabel =
       arr && Number.isFinite(arr.getTime())
         ? formatDurationFromMs(arr.getTime() - dep.getTime())
         : "—";
     const { baseFare, serviceFee } = splitTicketPrice(t.priceAmount);
-    const providerName = t.busDetails?.lineName?.split("·")[0]?.trim() ?? "Bus operator";
+    const providerName = t.busDetails?.lineName?.split("·")[0]?.trim() ?? "";
     const coverImageUrl = t.coverImageUrl?.trim() || busCoverImage();
 
     return {
@@ -188,7 +188,7 @@ function mapTrainRows(rows: TripSearchRow[]): SearchResult[] {
     const dep = new Date(t.departureAt);
     const arr = t.arrivalAt ? new Date(t.arrivalAt) : null;
     const hhmm = (d: Date) => d.toISOString().slice(11, 16);
-    const dateLabel = dep.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const dateLabel = dep.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
     const durationLabel =
       arr && Number.isFinite(arr.getTime())
         ? formatDurationFromMs(arr.getTime() - dep.getTime())
@@ -229,7 +229,7 @@ export function SearchFiltersAndResults() {
   const [timeSlot, setTimeSlot] = useState<TimeSlot>(null);
   const [luggage, setLuggage] = useState(true);
   const [instantBooking, setInstantBooking] = useState(false);
-  const [sortBy, setSortBy] = useState("Cheapest");
+  const [sortBy, setSortBy] = useState<"cheapest" | "fastest" | "earliest">("cheapest");
   const [apiCarpools, setApiCarpools] = useState<SearchResult[]>([]);
   const [apiBuses, setApiBuses] = useState<SearchResult[]>([]);
   const [apiTrains, setApiTrains] = useState<SearchResult[]>([]);
@@ -299,7 +299,7 @@ export function SearchFiltersAndResults() {
               if (cancelled) return;
               setApiFailedCarpool(true);
               setApiCarpools([]);
-              setApiError(e instanceof Error ? e.message : "Failed to load carpool offers");
+              setApiError(e instanceof Error ? e.message : tSearch("errorLoadCarpoolOffers"));
             }
           })()
         );
@@ -319,7 +319,7 @@ export function SearchFiltersAndResults() {
               if (cancelled) return;
               setApiFailedBus(true);
               setApiBuses([]);
-              setApiError((prev) => prev ?? (e instanceof Error ? e.message : "Failed to load bus offers"));
+              setApiError((prev) => prev ?? (e instanceof Error ? e.message : tSearch("errorLoadBusOffers")));
             }
           })()
         );
@@ -339,7 +339,7 @@ export function SearchFiltersAndResults() {
               if (cancelled) return;
               setApiFailedTrain(true);
               setApiTrains([]);
-              setApiError((prev) => prev ?? (e instanceof Error ? e.message : "Failed to load train offers"));
+              setApiError((prev) => prev ?? (e instanceof Error ? e.message : tSearch("errorLoadTrainOffers")));
             }
           })()
         );
@@ -351,36 +351,36 @@ export function SearchFiltersAndResults() {
     return () => {
       cancelled = true;
     };
-  }, [bus, carpool, train, requestParams, retryKey]);
+  }, [bus, carpool, train, requestParams, retryKey, tSearch]);
 
   const chips = useMemo(() => {
     const list: { key: string; label: string; onRemove: () => void }[] = [];
     if (timeSlot === "afternoon")
       list.push({
         key: "afternoon",
-        label: "Afternoon",
+        label: tSearch("timeAfternoon"),
         onRemove: () => setTimeSlot(null),
       });
     if (timeSlot === "morning")
       list.push({
         key: "morning",
-        label: "Morning",
+        label: tSearch("timeMorning"),
         onRemove: () => setTimeSlot(null),
       });
     if (timeSlot === "evening")
       list.push({
         key: "evening",
-        label: "Evening",
+        label: tSearch("timeEvening"),
         onRemove: () => setTimeSlot(null),
       });
     if (luggage)
       list.push({
         key: "luggage",
-        label: "Luggage",
+        label: tSearch("luggage"),
         onRemove: () => setLuggage(false),
       });
     return list;
-  }, [timeSlot, luggage]);
+  }, [timeSlot, luggage, tSearch]);
 
   function clearAllFilters() {
     setTimeSlot(null);
@@ -421,11 +421,11 @@ export function SearchFiltersAndResults() {
     });
 
     const sorted = [...filtered];
-    if (sortBy === "Cheapest") {
+    if (sortBy === "cheapest") {
       sorted.sort((a, b) => itemPrice(a) - itemPrice(b));
-    } else if (sortBy === "Fastest") {
+    } else if (sortBy === "fastest") {
       sorted.sort((a, b) => durationToMinutes(a.durationLabel) - durationToMinutes(b.durationLabel));
-    } else if (sortBy === "Earliest") {
+    } else if (sortBy === "earliest") {
       sorted.sort((a, b) => timeToMinutes(a.departureTime) - timeToMinutes(b.departureTime));
     }
 
@@ -453,12 +453,12 @@ export function SearchFiltersAndResults() {
         <div className="sticky top-40 space-y-6 rounded-xl bg-surface-container-low p-6">
           <h3 className="flex items-center gap-2 text-lg font-bold text-on-surface">
             <MaterialIcon name="filter_list" className="!text-xl" />
-            Filters
+            {tSearch("filters")}
           </h3>
 
           <div className="space-y-3">
             <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-              Transport Type
+              {tSearch("transportType")}
             </p>
             <div className="space-y-2">
               <label className="group flex cursor-pointer items-center gap-3">
@@ -469,7 +469,7 @@ export function SearchFiltersAndResults() {
                   className="h-5 w-5 rounded border-outline text-primary focus:ring-primary"
                 />
                 <span className="text-on-surface transition-colors group-hover:text-primary">
-                  Carpool
+                  {tSearch("modeCarpool")}
                 </span>
               </label>
               <label className="group flex cursor-pointer items-center gap-3">
@@ -479,7 +479,7 @@ export function SearchFiltersAndResults() {
                   onChange={(e) => setBus(e.target.checked)}
                   className="h-5 w-5 rounded border-outline text-primary focus:ring-primary"
                 />
-                <span className="text-on-surface transition-colors group-hover:text-primary">Bus</span>
+                <span className="text-on-surface transition-colors group-hover:text-primary">{tSearch("modeBus")}</span>
               </label>
               <label className="group flex cursor-pointer items-center gap-3">
                 <input
@@ -488,7 +488,7 @@ export function SearchFiltersAndResults() {
                   onChange={(e) => setTrain(e.target.checked)}
                   className="h-5 w-5 rounded border-outline text-primary focus:ring-primary"
                 />
-                <span className="text-on-surface transition-colors group-hover:text-primary">Train</span>
+                <span className="text-on-surface transition-colors group-hover:text-primary">{tSearch("modeTrain")}</span>
               </label>
             </div>
           </div>
@@ -496,7 +496,7 @@ export function SearchFiltersAndResults() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-                Price Range
+                {tSearch("priceRange")}
               </p>
               <span className="text-xs font-bold text-primary">{priceMax} DZD</span>
             </div>
@@ -510,21 +510,21 @@ export function SearchFiltersAndResults() {
               className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-outline-variant accent-primary"
             />
             <div className="flex justify-between text-[10px] font-medium text-on-surface-variant">
-              <span>0 DZD</span>
-              <span>5000 DZD</span>
+              <span>{tSearch("priceMinLabel")}</span>
+              <span>{tSearch("priceMaxLabel")}</span>
             </div>
           </div>
 
           <div className="space-y-3">
             <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-              Departure Time
+              {tSearch("departureTime")}
             </p>
             <div className="grid grid-cols-1 gap-2">
               {(
                 [
-                  { id: "morning" as const, label: "Morning", sub: "06:00-12:00" },
-                  { id: "afternoon" as const, label: "Afternoon", sub: "12:00-18:00" },
-                  { id: "evening" as const, label: "Evening", sub: "18:00-00:00" },
+                  { id: "morning" as const, label: tSearch("timeMorning"), sub: tSearch("timeMorningRange") },
+                  { id: "afternoon" as const, label: tSearch("timeAfternoon"), sub: tSearch("timeAfternoonRange") },
+                  { id: "evening" as const, label: tSearch("timeEvening"), sub: tSearch("timeEveningRange") },
                 ] as const
               ).map((slot) => (
                 <button
@@ -554,11 +554,11 @@ export function SearchFiltersAndResults() {
 
           <div className="space-y-3">
             <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-              Preferences
+              {tSearch("preferences")}
             </p>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-on-surface">Luggage included</span>
+                <span className="text-sm font-medium text-on-surface">{tSearch("luggageIncluded")}</span>
                 <button
                   type="button"
                   role="switch"
@@ -572,7 +572,7 @@ export function SearchFiltersAndResults() {
                 </button>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-on-surface">Instant Booking</span>
+                <span className="text-sm font-medium text-on-surface">{tSearch("instantBooking")}</span>
                 <button
                   type="button"
                   role="switch"
@@ -602,7 +602,7 @@ export function SearchFiltersAndResults() {
               }}
               className="rounded-full bg-on-error-container/15 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-on-error-container hover:bg-on-error-container/25"
             >
-              Retry
+              {tSearch("retry")}
             </button>
           </div>
         )}
@@ -610,7 +610,7 @@ export function SearchFiltersAndResults() {
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <h1 className="font-headline text-2xl font-bold text-on-surface">
-                {visibleResults.length} results found
+                {tSearch("resultsFound", { count: visibleResults.length })}
               </h1>
               {requestParams.destinationAny ? (
                 <p className="mt-1 text-sm text-on-surface-variant">
@@ -619,15 +619,15 @@ export function SearchFiltersAndResults() {
               ) : null}
             </div>
             <div className="flex items-center gap-2 rounded-full bg-surface-container-low px-4 py-2">
-              <span className="text-xs font-semibold text-on-surface-variant">Sort by:</span>
+              <span className="text-xs font-semibold text-on-surface-variant">{tSearch("sortBy")}</span>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="cursor-pointer border-none bg-transparent p-0 text-xs font-bold text-primary focus:ring-0"
+                onChange={(e) => setSortBy(e.target.value as "cheapest" | "fastest" | "earliest")}
+                className="cursor-pointer border-none bg-transparent p-0 text-base font-bold text-primary focus:ring-0 md:text-xs"
               >
-                <option>Cheapest</option>
-                <option>Fastest</option>
-                <option>Earliest</option>
+                <option value="cheapest">{tSearch("sortCheapest")}</option>
+                <option value="fastest">{tSearch("sortFastest")}</option>
+                <option value="earliest">{tSearch("sortEarliest")}</option>
               </select>
             </div>
           </div>
@@ -644,7 +644,7 @@ export function SearchFiltersAndResults() {
                     type="button"
                     onClick={c.onRemove}
                     className="inline-flex rounded p-0.5 hover:bg-black/5"
-                    aria-label={`Remove ${c.label}`}
+                    aria-label={tSearch("removeFilterAria", { label: c.label })}
                   >
                     <MaterialIcon name="close" className="!text-sm" />
                   </button>
@@ -655,7 +655,7 @@ export function SearchFiltersAndResults() {
                 onClick={clearAllFilters}
                 className="ml-2 text-[11px] font-bold text-primary underline"
               >
-                Clear all
+                {tSearch("clearAll")}
               </button>
             </div>
           )}
@@ -707,13 +707,13 @@ export function SearchFiltersAndResults() {
                           name={item.mode === "carpool" ? "directions_car" : item.mode === "bus" ? "directions_bus" : "train"}
                           className="!text-sm text-primary"
                         />
-                        {item.mode === "carpool" ? "Covoiturage" : item.mode === "bus" ? "Bus" : "Train"}
+                        {item.mode === "carpool" ? tSearch("modeCarpool") : item.mode === "bus" ? tSearch("modeBus") : tSearch("modeTrain")}
                       </div>
                     </div>
                   )}
                   {soldOut && (
                     <div className="absolute right-[-35px] top-4 z-10 rotate-45 bg-error py-1 pl-10 pr-10 text-[10px] font-bold text-white">
-                      SOLD OUT
+                      {tSearch("soldOut")}
                     </div>
                   )}
 
@@ -733,13 +733,13 @@ export function SearchFiltersAndResults() {
                         <div>
                           <p className="text-sm font-bold text-on-surface">{item.fromLabel}</p>
                           <p className="text-[10px] font-medium text-on-surface-variant">
-                            {item.mode === "carpool" ? "Pickup" : "Terminal"}
+                            {item.mode === "carpool" ? tSearch("pickup") : tSearch("terminal")}
                           </p>
                         </div>
                         <div>
                           <p className="text-sm font-bold text-on-surface">{item.toLabel}</p>
                           <p className="text-[10px] font-medium text-on-surface-variant">
-                            {item.mode === "carpool" ? "Drop-off" : "Arrival"}
+                            {item.mode === "carpool" ? tSearch("dropoff") : tSearch("arrival")}
                           </p>
                         </div>
                       </div>
@@ -753,11 +753,11 @@ export function SearchFiltersAndResults() {
 
                         {item.mode === "carpool" ? (
                           <p className="text-[10px] font-bold text-tertiary">
-                            {item.seatsLeft} seats left
+                            {tSearch("seatsLeft", { count: item.seatsLeft })}
                           </p>
                         ) : (
                           <span className="mt-1 inline-block rounded-full bg-secondary-container px-2 py-0.5 text-[9px] font-bold text-on-secondary-fixed-variant">
-                            {item.serviceClass} Class
+                            {tSearch("serviceClass", { value: item.serviceClass })}
                           </span>
                         )}
                       </div>
@@ -768,14 +768,14 @@ export function SearchFiltersAndResults() {
                           disabled
                           className="mt-4 w-full cursor-not-allowed rounded-full bg-surface-container-high py-2.5 text-xs font-bold text-on-surface-variant"
                         >
-                          Full
+                          {tSearch("full")}
                         </button>
                       ) : (
                         <Link
                           href={href}
                           className="mt-4 w-full rounded-full bg-gradient-primary py-2.5 text-center text-xs font-bold text-white transition-transform group-hover:scale-[1.02]"
                         >
-                          View Details
+                          {tSearch("viewDetails")}
                         </Link>
                       )}
                     </div>
@@ -787,7 +787,7 @@ export function SearchFiltersAndResults() {
                         <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-surface-container-high">
                           <Image
                             src={DRIVER_IMG}
-                            alt={item.driverName}
+                            alt={item.driverName || tSearch("driverDefault")}
                             fill
                             className="object-cover"
                             sizes="40px"
@@ -798,7 +798,7 @@ export function SearchFiltersAndResults() {
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-bold text-on-surface">{item.driverName}</span>
+                            <span className="text-sm font-bold text-on-surface">{item.driverName || tSearch("driverDefault")}</span>
                             <span className="flex items-center gap-0.5 text-xs font-medium text-on-surface-variant">
                               <MaterialIcon name="star" filled className="!text-sm text-amber-500" />
                               {item.driverRating.toFixed(1)}
@@ -818,9 +818,9 @@ export function SearchFiltersAndResults() {
                           />
                         </div>
                         <div>
-                          <span className="text-sm font-bold text-on-surface">{item.providerName}</span>
+                          <span className="text-sm font-bold text-on-surface">{item.providerName || tSearch("operatorDefault")}</span>
                           <p className="text-[10px] font-medium text-on-surface-variant">
-                            Scheduled Service
+                            {tSearch("scheduledService")}
                           </p>
                         </div>
                       </div>
@@ -830,31 +830,31 @@ export function SearchFiltersAndResults() {
                       {item.mode !== "carpool" && item.instantConfirmation && (
                         <div className="flex items-center gap-1 text-[10px] font-bold text-green-600">
                           <MaterialIcon name="bolt" className="!text-xs" />
-                          Instant Confirmation
+                          {tSearch("instantConfirmation")}
                         </div>
                       )}
                       {item.mode === "carpool" && item.instantBooking && (
                         <div className="flex items-center gap-1 text-[10px] font-bold text-green-600">
                           <MaterialIcon name="bolt" className="!text-xs" />
-                          Instant Booking
+                          {tSearch("instantBooking")}
                         </div>
                       )}
                       {item.mode === "carpool" && item.womenOnly && (
                         <div className="flex items-center gap-1 text-[10px] font-bold text-primary-container">
                           <MaterialIcon name="woman" className="!text-xs" />
-                          Women-only
+                          {tSearch("womenOnly")}
                         </div>
                       )}
                       {item.mode === "carpool" && item.luggageIncluded && (
                         <div className="flex items-center gap-1 text-[10px] font-bold text-on-surface-variant">
                           <MaterialIcon name="luggage" className="!text-xs" />
-                          Luggage included
+                          {tSearch("luggageIncluded")}
                         </div>
                       )}
                       {item.mode !== "carpool" && (
                         <div className="flex items-center gap-1 text-[10px] font-bold text-on-surface-variant">
                           <MaterialIcon name="chair" className="!text-xs" />
-                          {item.availableSeats} Available
+                          {tSearch("availableSeats", { count: item.availableSeats })}
                         </div>
                       )}
                     </div>

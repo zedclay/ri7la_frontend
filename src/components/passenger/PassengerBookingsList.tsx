@@ -20,15 +20,7 @@ function statusPill(status: string) {
 }
 
 function statusLabel(status: string) {
-  if (status === "awaiting_approval") return "Awaiting approval";
-  if (status === "requested") return "Pending";
   return status.charAt(0).toUpperCase() + status.slice(1);
-}
-
-function modeLabel(b: Booking) {
-  if (b.mode === "bus") return "Bus";
-  if (b.mode === "train") return "Train";
-  return "Carpool";
 }
 
 function snapshotTicketTripIds(): Set<string> {
@@ -65,6 +57,7 @@ function canMessageDriverOnBooking(b: Booking) {
 }
 
 export function PassengerBookingsList({ initialBookings = [] }: Props) {
+  const t = useTranslations("bookings");
   const tMsg = useTranslations("messaging");
   const [rows, setRows] = useState<Booking[]>(initialBookings);
   const [ticketTripIds, setTicketTripIds] = useState<Set<string>>(() => snapshotTicketTripIds());
@@ -91,13 +84,13 @@ export function PassengerBookingsList({ initialBookings = [] }: Props) {
       const mapped = list.map(apiBookingRowToBooking);
       refreshSnapshots(mapped);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Could not load bookings.";
+      const msg = e instanceof Error ? e.message : t("loadErrorFallback");
       setLoadError(msg);
       setRows([]);
     } finally {
       setLoading(false);
     }
-  }, [refreshSnapshots]);
+  }, [refreshSnapshots, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -138,15 +131,13 @@ export function PassengerBookingsList({ initialBookings = [] }: Props) {
     return (
       <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-10 text-center shadow-sm">
         <MaterialIcon name="login" className="mx-auto !text-5xl text-primary" />
-        <h2 className="mt-4 font-headline text-xl font-extrabold text-on-surface">Sign in to see your bookings</h2>
-        <p className="mt-2 text-sm text-on-surface-variant">
-          Your reservations are loaded from your Ri7la account after you sign in.
-        </p>
+        <h2 className="mt-4 font-headline text-xl font-extrabold text-on-surface">{t("authTitle")}</h2>
+        <p className="mt-2 text-sm text-on-surface-variant">{t("authBody")}</p>
         <Link
           href="/auth/login"
           className="mt-6 inline-flex rounded-full bg-primary px-8 py-3 text-sm font-bold text-on-primary shadow-lg shadow-primary/15"
         >
-          Sign in
+          {t("authCta")}
         </Link>
       </div>
     );
@@ -164,7 +155,7 @@ export function PassengerBookingsList({ initialBookings = [] }: Props) {
           }}
           className="mt-4 text-sm font-bold text-primary underline"
         >
-          Try again
+          {t("retry")}
         </button>
       </div>
     );
@@ -174,15 +165,13 @@ export function PassengerBookingsList({ initialBookings = [] }: Props) {
     return (
       <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-10 text-center shadow-sm">
         <MaterialIcon name="event_available" className="mx-auto !text-5xl text-on-surface-variant" />
-        <h2 className="mt-4 font-headline text-xl font-extrabold text-on-surface">No bookings yet</h2>
-        <p className="mt-2 text-sm text-on-surface-variant">
-          Search for a trip and book a seat — your trips will appear here.
-        </p>
+        <h2 className="mt-4 font-headline text-xl font-extrabold text-on-surface">{t("emptyTitle")}</h2>
+        <p className="mt-2 text-sm text-on-surface-variant">{t("emptyBody")}</p>
         <Link
           href="/search"
           className="mt-6 inline-flex rounded-full bg-primary px-8 py-3 text-sm font-bold text-on-primary shadow-lg shadow-primary/15"
         >
-          Search trips
+          {t("emptyCta")}
         </Link>
       </div>
     );
@@ -203,7 +192,7 @@ export function PassengerBookingsList({ initialBookings = [] }: Props) {
                     name={b.mode === "bus" ? "directions_bus" : b.mode === "train" ? "train" : "directions_car"}
                     className="!text-sm"
                   />
-                  {modeLabel(b)}
+                  {b.mode === "bus" ? t("modeBus") : b.mode === "train" ? t("modeTrain") : t("modeCarpool")}
                 </div>
               </div>
 
@@ -213,33 +202,43 @@ export function PassengerBookingsList({ initialBookings = [] }: Props) {
                     {b.fromLabel} <span className="mx-1 text-outline">→</span> {b.toLabel}
                   </div>
                   <span className={`rounded-full px-3 py-1 text-[10px] font-bold ${statusPill(b.status)}`}>
-                    {statusLabel(b.status)}
+                    {b.status === "confirmed"
+                      ? t("statusConfirmed")
+                      : b.status === "awaiting_approval"
+                        ? t("statusAwaitingApproval")
+                        : b.status === "requested"
+                          ? t("statusRequested")
+                          : b.status === "completed"
+                            ? t("statusCompleted")
+                            : b.status === "cancelled"
+                              ? t("statusCancelled")
+                              : statusLabel(b.status)}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
                   <div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Date</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{t("fieldDate")}</div>
                     <div className="mt-1 text-sm font-bold text-on-surface">{b.dateLabel}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Departure</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{t("fieldDeparture")}</div>
                     <div className="mt-1 text-sm font-bold text-on-surface">{b.departureTime}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Reference</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{t("fieldReference")}</div>
                     <div className="mt-1 text-sm font-extrabold text-primary-container">{b.referenceCode}</div>
                   </div>
                   <div>
                     <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-                      {b.mode === "carpool" ? "Mode" : "Seat"}
+                      {b.mode === "carpool" ? t("fieldMode") : t("fieldSeat")}
                     </div>
                     <div className="mt-1 text-sm font-bold text-on-surface">
-                      {b.mode === "carpool" ? "Carpool" : (b.seatLabel ?? "—")}
+                      {b.mode === "carpool" ? t("modeCarpool") : (b.seatLabel ?? "—")}
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Total</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{t("fieldTotal")}</div>
                     <div className="mt-1 text-sm font-extrabold text-on-surface">
                       {b.totalPrice.amount.toLocaleString("fr-DZ")} {b.totalPrice.currency}
                     </div>
@@ -255,7 +254,7 @@ export function PassengerBookingsList({ initialBookings = [] }: Props) {
                     className="inline-flex items-center gap-2 rounded-full bg-surface-container-low px-5 py-2.5 text-xs font-bold text-on-surface active:scale-95"
                   >
                     <MaterialIcon name="download" className="!text-lg" />
-                    Download ticket
+                    {tMsg("ctaDownloadTicket")}
                   </button>
                 ) : null}
                 {canMessageDriverOnBooking(b) ? (
@@ -271,8 +270,8 @@ export function PassengerBookingsList({ initialBookings = [] }: Props) {
                   href={`/passenger/bookings/${b.id}`}
                   className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-xs font-bold text-on-primary shadow-lg shadow-primary/10 active:scale-95"
                 >
-                  View details
-                  <MaterialIcon name="arrow_forward" className="!text-lg" />
+                  {t("viewDetails")}
+                  <MaterialIcon name="arrow_forward" className="!text-lg rtl:rotate-180" />
                 </Link>
               </div>
             </div>

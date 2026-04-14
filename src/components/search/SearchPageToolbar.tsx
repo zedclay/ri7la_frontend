@@ -268,7 +268,7 @@ export function SearchPageToolbar() {
                         type="date"
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
-                        className="w-full rounded-xl border-none bg-surface-container-low py-3.5 ps-10 pe-2 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary-container"
+                        className="w-full rounded-xl border-none bg-surface-container-low py-3.5 ps-10 pe-2 text-base font-medium text-on-surface focus:ring-2 focus:ring-primary-container md:text-sm"
                       />
                     </div>
                   </div>
@@ -287,7 +287,7 @@ export function SearchPageToolbar() {
                         max={8}
                         value={passengers}
                         onChange={(e) => setPassengers(e.target.value)}
-                        className="w-full rounded-xl border-none bg-surface-container-low py-3.5 ps-10 pe-2 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary-container"
+                        className="w-full rounded-xl border-none bg-surface-container-low py-3.5 ps-10 pe-2 text-base font-medium text-on-surface focus:ring-2 focus:ring-primary-container md:text-sm"
                       />
                     </div>
                   </div>

@@ -101,8 +101,8 @@ export function VerifyAccountClient() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-surface">
-      <header className="flex items-center justify-between px-6 py-5">
+    <div className="flex min-h-[100dvh] flex-col bg-surface">
+      <header className="flex h-[72px] items-center justify-between px-6">
         <Link href="/" className="font-headline text-lg font-extrabold tracking-tight text-primary-container">
           Ri7la
         </Link>
@@ -161,7 +161,7 @@ export function VerifyAccountClient() {
                   value={profileFullName}
                   onChange={(e) => setProfileFullName(e.target.value)}
                   placeholder={t("signupFullNamePlaceholder")}
-                  className="w-full rounded-xl border-none bg-surface-container-low px-4 py-3 text-sm font-medium text-on-surface outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full rounded-xl border-none bg-surface-container-low px-4 py-3 text-base font-medium text-on-surface outline-none focus:ring-2 focus:ring-primary md:text-sm"
                 />
               </div>
               <div>
@@ -175,7 +175,7 @@ export function VerifyAccountClient() {
                   value={profileEmail}
                   onChange={(e) => setProfileEmail(e.target.value)}
                   placeholder={t("signupEmailPlaceholder")}
-                  className="w-full rounded-xl border-none bg-surface-container-low px-4 py-3 text-sm font-medium text-on-surface outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full rounded-xl border-none bg-surface-container-low px-4 py-3 text-base font-medium text-on-surface outline-none focus:ring-2 focus:ring-primary md:text-sm"
                 />
               </div>
             </div>

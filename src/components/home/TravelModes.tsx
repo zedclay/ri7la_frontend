@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
 const IMG_CARPOOL =
-  "https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=1400&q=80";
+  "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1400&q=80";
 
 const IMG_BUS =
   "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1400&q=80";

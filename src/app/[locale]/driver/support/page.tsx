@@ -58,11 +58,11 @@ export default function DriverSupportPage() {
             </div>
             <div>
               <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Subject</div>
-              <input className="mt-2 w-full rounded-xl border-none bg-surface-container-low px-4 py-3 text-sm font-semibold text-on-surface outline-none focus:ring-2 focus:ring-primary" placeholder="Brief summary" />
+              <input className="mt-2 w-full rounded-xl border-none bg-surface-container-low px-4 py-3 text-base font-semibold text-on-surface outline-none focus:ring-2 focus:ring-primary md:text-sm" placeholder="Brief summary" />
             </div>
             <div>
               <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Description</div>
-              <textarea className="mt-2 min-h-32 w-full resize-none rounded-xl border-none bg-surface-container-low px-4 py-3 text-sm font-semibold text-on-surface outline-none focus:ring-2 focus:ring-primary" placeholder="What happened?" />
+              <textarea className="mt-2 min-h-32 w-full resize-none rounded-xl border-none bg-surface-container-low px-4 py-3 text-base font-semibold text-on-surface outline-none focus:ring-2 focus:ring-primary md:text-sm" placeholder="What happened?" />
             </div>
             <button type="button" className="w-full rounded-full bg-primary py-3 text-sm font-extrabold text-on-primary shadow-lg shadow-primary/10 active:scale-95">
               Submit Request
@@ -87,4 +87,3 @@ export default function DriverSupportPage() {
     </div>
   );
 }
-

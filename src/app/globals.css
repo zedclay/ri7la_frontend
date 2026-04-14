@@ -74,6 +74,14 @@
 body {
   background: var(--stitch-surface);
   color: var(--stitch-on-surface-variant);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+html {
+  scroll-padding-top: calc(env(safe-area-inset-top) + 84px);
 }
 
 /* Arabic locale: use Noto variable from root layout (avoid second next/font download in [locale]/layout). */

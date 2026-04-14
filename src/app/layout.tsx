@@ -29,12 +29,13 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="fr"
-      dir="ltr"
+      lang="ar"
+      dir="rtl"
       className={`${manrope.variable} ${inter.variable} ${notoArabic.variable} h-full scroll-smooth antialiased`}
       suppressHydrationWarning
     >
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

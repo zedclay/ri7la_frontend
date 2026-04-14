@@ -66,7 +66,7 @@ export default function PassengerSupportPage() {
                 Subject
               </label>
               <input
-                className="mt-2 w-full rounded-xl border-none bg-surface-container-low px-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary"
+                className="mt-2 w-full rounded-xl border-none bg-surface-container-low px-4 py-3 text-base text-on-surface outline-none focus:ring-2 focus:ring-primary md:text-sm"
                 placeholder="Brief summary of your issue"
               />
             </div>
@@ -76,7 +76,7 @@ export default function PassengerSupportPage() {
                 Description
               </label>
               <textarea
-                className="mt-2 min-h-32 w-full resize-none rounded-xl border-none bg-surface-container-low px-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary"
+                className="mt-2 min-h-32 w-full resize-none rounded-xl border-none bg-surface-container-low px-4 py-3 text-base text-on-surface outline-none focus:ring-2 focus:ring-primary md:text-sm"
                 placeholder="How can our concierge help you?"
               />
             </div>
@@ -110,4 +110,3 @@ export default function PassengerSupportPage() {
     </div>
   );
 }
-

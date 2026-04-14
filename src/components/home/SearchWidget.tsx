@@ -129,7 +129,7 @@ export function SearchWidget() {
                   <input
                     name="date"
                     type="date"
-                    className="w-full rounded-lg border-none bg-surface-container-low py-4 ps-10 pe-3 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary-container"
+                    className="w-full rounded-lg border-none bg-surface-container-low py-4 ps-10 pe-3 text-base font-medium text-on-surface focus:ring-2 focus:ring-primary-container md:text-sm"
                   />
                 </div>
               </div>
@@ -148,7 +148,7 @@ export function SearchWidget() {
                     min={1}
                     max={8}
                     defaultValue={1}
-                    className="w-full rounded-lg border-none bg-surface-container-low py-4 ps-10 pe-3 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary-container"
+                    className="w-full rounded-lg border-none bg-surface-container-low py-4 ps-10 pe-3 text-base font-medium text-on-surface focus:ring-2 focus:ring-primary-container md:text-sm"
                   />
                 </div>
               </div>

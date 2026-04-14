@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import { HelpPageContent } from "@/components/help/HelpPageContent";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Aide & FAQ — Ri7la",
-  description:
-    "Centre d'aide Ri7la : réservations, paiements, covoiturage, bus et remboursements.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = await getTranslations({ locale, namespace: "help" });
+  return {
+    title: `${t("metaTitle")} — Ri7la`,
+    description: t("metaDescription"),
+  };
+}
 
 export default function HelpPage() {
   return <HelpPageContent />;

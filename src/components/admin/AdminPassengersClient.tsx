@@ -201,7 +201,7 @@ export function AdminPassengersClient() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search by name, email, phone, or paste user id…"
-            className="min-w-0 flex-1 border-none bg-transparent text-sm text-on-surface outline-none"
+            className="min-w-0 flex-1 border-none bg-transparent text-base text-on-surface outline-none md:text-sm"
           />
         </div>
         <div className="text-xs font-bold text-on-surface-variant">

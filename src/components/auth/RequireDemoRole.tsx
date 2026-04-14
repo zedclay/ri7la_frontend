@@ -33,8 +33,9 @@ export function RequireDemoRole({
 
   useEffect(() => {
     const tokens = getAuthTokens();
-    /** Let the page render (e.g. “Sign in to see your bookings”) instead of forcing login first. */
     if (!tokens) {
+      const next = pathname || "/";
+      router.replace(`/auth/login?next=${encodeURIComponent(next)}`);
       return;
     }
     let cancelled = false;
@@ -58,7 +59,6 @@ export function RequireDemoRole({
       cancelled = true;
     };
   }, [pathname, requireDriverOnboardingComplete, requireProfileComplete, role, router]);
-
 
   return null;
 }
