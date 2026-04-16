@@ -102,8 +102,8 @@ export function DriverTripsClient() {
     function onAuth() {
       void load();
     }
-    window.addEventListener("ri7la_auth", onAuth);
-    return () => window.removeEventListener("ri7la_auth", onAuth);
+    window.addEventListener("saafir_auth", onAuth);
+    return () => window.removeEventListener("saafir_auth", onAuth);
   }, [load]);
 
   const now = useMemo(() => new Date(), []);

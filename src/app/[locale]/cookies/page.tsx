@@ -3,8 +3,8 @@ import { PublicFooter } from "@/components/layout/PublicFooter";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 
 export const metadata: Metadata = {
-  title: "Cookies — Ri7la",
-  description: "Informations sur l’utilisation des cookies et traceurs sur Ri7la.",
+  title: "Cookies — Saafir",
+  description: "Informations sur l’utilisation des cookies et traceurs sur Saafir.",
 };
 
 export default function CookiesPage() {
@@ -45,4 +45,3 @@ export default function CookiesPage() {
     </div>
   );
 }
-

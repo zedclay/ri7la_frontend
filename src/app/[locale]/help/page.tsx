@@ -6,7 +6,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const t = await getTranslations({ locale, namespace: "help" });
   return {
-    title: `${t("metaTitle")} — Ri7la`,
+    title: `${t("metaTitle")} — Saafir`,
     description: t("metaDescription"),
   };
 }

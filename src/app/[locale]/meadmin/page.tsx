@@ -5,8 +5,8 @@ import { LoginForm } from "@/components/auth/LoginForm";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
 export const metadata: Metadata = {
-  title: "Admin Login — Ri7la",
-  description: "Admin console login for Ri7la.",
+  title: "Admin Login — Saafir",
+  description: "Admin console login for Saafir.",
 };
 
 export default function AdminLoginPage() {
@@ -14,8 +14,8 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-surface font-body text-on-surface-variant">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <Link href="/" className="flex items-center gap-2">
-          <MaterialIcon name="commute" className="!text-2xl text-primary" />
-          <span className="font-headline text-xl font-extrabold tracking-tight text-primary-container">Ri7la</span>
+          <img src="/saafir-icon.svg" alt="" className="h-7 w-7" />
+          <img src="/saafir-wordmark.svg" alt="Saafir" className="h-5 w-auto" />
         </Link>
         <Link href="/auth/login" className="text-sm font-bold text-primary underline underline-offset-4">
           Passenger/Driver Login

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { VerifyAccountClient } from "./verify-account-client";
 
 export const metadata: Metadata = {
-  title: "Vérification du compte — Ri7la",
+  title: "Vérification du compte — Saafir",
   description: "Vérifiez votre compte avec un code envoyé par SMS ou e-mail.",
 };
 

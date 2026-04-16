@@ -90,32 +90,31 @@ export function LoginForm({ showError = false, fixedRole }: Props) {
           setError(null);
           const next = searchParams.get("next") || undefined;
           const value = identifier.trim();
-          if (fixedRole) {
-            try {
-              const res = await apiPostJsonData<{
-                user: { roles: string[] };
-                tokens: { accessToken: string; refreshToken: string };
-              }>("/api/auth/login", { identifier: value, password });
-              setAuthTokens(res.tokens);
-              router.push(next || dashboardForRole(res.user.roles.includes("ADMIN") ? "admin" : "passenger"));
-            } catch (e2) {
-              setError(e2 instanceof Error ? e2.message : t("loginFailed"));
-            }
-            return;
-          }
-          if (!value) return;
           try {
-            await apiPostJsonData<{ ok: boolean }>("/api/auth/otp/request", {
-              phone: value,
-              flow: "LOGIN",
-            });
-            const qs = new URLSearchParams();
-            qs.set("flow", "login");
-            qs.set("phone", value);
-            if (next) qs.set("next", next);
-            router.push(`/auth/verify?${qs.toString()}`);
+            const res = await apiPostJsonData<{
+              user: { roles: string[] };
+              tokens: { accessToken: string; refreshToken: string };
+            }>("/api/auth/login", { identifier: value, password });
+
+            if (fixedRole === "admin" && !res.user.roles.includes("ADMIN")) {
+              clearAuth();
+              setError(t("invalidCredentials"));
+              return;
+            }
+
+            setAuthTokens(res.tokens);
+
+            if (res.user.roles.includes("ADMIN")) {
+              router.push(dashboardForRole("admin"));
+              return;
+            }
+            if (res.user.roles.includes("DRIVER")) {
+              router.push(next?.startsWith("/driver") ? next : dashboardForRole("driver"));
+              return;
+            }
+            router.push(next || dashboardForRole("passenger"));
           } catch (e2) {
-            setError(e2 instanceof Error ? e2.message : t("failedOtp"));
+            setError(e2 instanceof Error ? e2.message : t("loginFailed"));
           }
         }}
       >
@@ -143,57 +142,53 @@ export function LoginForm({ showError = false, fixedRole }: Props) {
           </div>
         </div>
 
-        {fixedRole && (
-          <>
-            <div className="space-y-2">
-              <label htmlFor="password" className="ms-1 text-sm font-semibold text-on-surface">
-                {t("password")}
-              </label>
-              <div className="group relative">
-                <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-4">
-                  <MaterialIcon
-                    name="lock"
-                    className="!text-xl text-outline transition-colors group-focus-within:text-primary"
-                  />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full rounded-xl border-none bg-surface-container-low py-3.5 ps-11 pe-12 text-on-surface outline-none transition-all placeholder:text-outline focus:ring-2 focus:ring-primary"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 end-0 flex items-center pe-4 text-outline transition-colors hover:text-primary"
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? t("hidePassword") : t("showPassword")}
-                >
-                  <MaterialIcon name={showPassword ? "visibility_off" : "visibility"} />
-                </button>
-              </div>
+        <div className="space-y-2">
+          <label htmlFor="password" className="ms-1 text-sm font-semibold text-on-surface">
+            {t("password")}
+          </label>
+          <div className="group relative">
+            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-4">
+              <MaterialIcon
+                name="lock"
+                className="!text-xl text-outline transition-colors group-focus-within:text-primary"
+              />
             </div>
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="block w-full rounded-xl border-none bg-surface-container-low py-3.5 ps-11 pe-12 text-on-surface outline-none transition-all placeholder:text-outline focus:ring-2 focus:ring-primary"
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 end-0 flex items-center pe-4 text-outline transition-colors hover:text-primary"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+            >
+              <MaterialIcon name={showPassword ? "visibility_off" : "visibility"} />
+            </button>
+          </div>
+        </div>
 
-            <div className="flex items-center justify-end">
-              <Link
-                href="/auth/forgot-password"
-                className="text-sm font-semibold text-primary transition-colors hover:text-primary-container"
-              >
-                {t("forgotPassword")}
-              </Link>
-            </div>
-          </>
-        )}
+        <div className="flex items-center justify-end">
+          <Link
+            href="/auth/forgot-password"
+            className="text-sm font-semibold text-primary transition-colors hover:text-primary-container"
+          >
+            {t("forgotPassword")}
+          </Link>
+        </div>
 
         <button
           type="submit"
-          disabled={fixedRole ? !password : !identifier.trim()}
+          disabled={!identifier.trim() || password.trim().length === 0}
           className="gradient-primary w-full rounded-full px-6 py-4 font-headline font-bold text-on-primary shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-primary/20 active:scale-95"
         >
-          {fixedRole ? t("logIn") : t("sendOtp")}
+          {t("logIn")}
         </button>
       </form>
 

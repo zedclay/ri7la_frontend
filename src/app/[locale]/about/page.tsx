@@ -4,8 +4,8 @@ import { PublicHeader } from "@/components/layout/PublicHeader";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
 export const metadata: Metadata = {
-  title: "À propos — Ri7la",
-  description: "Découvrez la mission de Ri7la : mobilité accessible en Algérie.",
+  title: "À propos — Saafir",
+  description: "Découvrez la mission de Saafir : mobilité accessible en Algérie.",
 };
 
 export default function AboutPage() {
@@ -18,10 +18,10 @@ export default function AboutPage() {
             <MaterialIcon name="explore" className="!text-3xl text-primary" />
           </div>
           <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
-            À propos de Ri7la
+            À propos de Saafir
           </h1>
           <p className="mt-4 max-w-2xl text-on-surface-variant">
-            Ri7la aide les voyageurs en Algérie à trouver des trajets fiables, transparents, et adaptés
+            Saafir aide les voyageurs en Algérie à trouver des trajets fiables, transparents, et adaptés
             à la réalité locale : covoiturage et bus, avec support et sécurité.
           </p>
 
@@ -46,4 +46,3 @@ export default function AboutPage() {
     </div>
   );
 }
-

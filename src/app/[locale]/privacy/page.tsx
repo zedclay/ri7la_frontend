@@ -3,9 +3,9 @@ import { PublicFooter } from "@/components/layout/PublicFooter";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 
 export const metadata: Metadata = {
-  title: "Politique de Confidentialité — Ri7la",
+  title: "Politique de Confidentialité — Saafir",
   description:
-    "Politique de confidentialité Ri7la : données collectées, utilisation, conservation, et droits des utilisateurs.",
+    "Politique de confidentialité Saafir : données collectées, utilisation, conservation, et droits des utilisateurs.",
 };
 
 export default function PrivacyPage() {
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
           Politique de Confidentialité
         </h1>
         <p className="mb-10 text-on-surface-variant">
-          Cette page est une version MVP. Elle décrit les principes de base appliqués à Ri7la en
+          Cette page est une version MVP. Elle décrit les principes de base appliqués à Saafir en
           attendant la version juridique finale.
         </p>
 
@@ -59,4 +59,3 @@ export default function PrivacyPage() {
     </div>
   );
 }
-

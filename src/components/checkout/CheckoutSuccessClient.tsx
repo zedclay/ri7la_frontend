@@ -25,7 +25,7 @@ export function CheckoutSuccessClient({ bookingId, booking }: { bookingId: strin
     setChecked(true);
     if (!s) {
       try {
-        const n = sessionStorage.getItem(`ri7la_success_passenger_${bookingId}`);
+        const n = sessionStorage.getItem(`saafir_success_passenger_${bookingId}`);
         if (n) {
           /* legacy: name without full snapshot — user should re-confirm */
         }
@@ -94,8 +94,11 @@ export function CheckoutSuccessClient({ bookingId, booking }: { bookingId: strin
         </main>
         <footer className="border-t border-outline-variant/10 bg-surface-container-low px-6 py-8">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-xs text-on-surface-variant md:flex-row">
-            <div className="font-headline font-bold text-primary-container">Ri7la</div>
-            <div>© {new Date().getFullYear()} Ri7la</div>
+            <div className="flex items-center gap-2">
+              <img src="/saafir-icon.svg" alt="" className="h-7 w-7" />
+              <img src="/saafir-wordmark.svg" alt="Saafir" className="h-5 w-auto" />
+            </div>
+            <div>© {new Date().getFullYear()} Saafir</div>
           </div>
         </footer>
       </>
@@ -276,7 +279,10 @@ export function CheckoutSuccessClient({ bookingId, booking }: { bookingId: strin
 
       <footer className="border-t border-outline-variant/10 bg-surface-container-low px-6 py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-xs text-on-surface-variant md:flex-row">
-          <div className="font-headline font-bold text-primary-container">Ri7la</div>
+          <div className="flex items-center gap-2">
+            <img src="/saafir-icon.svg" alt="" className="h-7 w-7" />
+            <img src="/saafir-wordmark.svg" alt="Saafir" className="h-5 w-auto" />
+          </div>
           <div className="flex flex-wrap justify-center gap-6">
             <Link href="/help" className="hover:text-primary">
               {t("footerHelp")}
@@ -289,7 +295,7 @@ export function CheckoutSuccessClient({ bookingId, booking }: { bookingId: strin
             </Link>
           </div>
           <div>
-            © {new Date().getFullYear()} Ri7la. {t("footerRights")}
+            © {new Date().getFullYear()} Saafir. {t("footerRights")}
           </div>
         </div>
       </footer>

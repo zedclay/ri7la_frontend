@@ -78,8 +78,8 @@ export function BookingMessagingHub({ variant }: { variant: "passenger" | "drive
     }
     sync();
     setClientReady(true);
-    window.addEventListener("ri7la_auth", sync);
-    return () => window.removeEventListener("ri7la_auth", sync);
+    window.addEventListener("saafir_auth", sync);
+    return () => window.removeEventListener("saafir_auth", sync);
   }, []);
 
   const loadThreads = useCallback(async () => {

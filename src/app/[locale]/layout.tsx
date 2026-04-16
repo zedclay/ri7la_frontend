@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { LocaleHtmlAttributes } from "@/components/i18n/LocaleHtmlAttributes";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -38,7 +37,6 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <LocaleHtmlAttributes />
       <div className={isRtl ? "locale-font-arabic" : undefined}>{children}</div>
     </NextIntlClientProvider>
   );

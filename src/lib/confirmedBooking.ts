@@ -1,8 +1,8 @@
 import type { Booking, PaymentMethod, TripMode } from "@/lib/types";
 import type { PassengerCheckoutDraft, PaymentCheckoutDraft } from "@/lib/checkoutStorage";
 
-export const CONFIRMED_BOOKING_KEY_PREFIX = "ri7la_confirmed_booking_";
-export const COMPLETED_BOOKING_IDS_KEY = "ri7la_completed_booking_ids";
+export const CONFIRMED_BOOKING_KEY_PREFIX = "saafir_confirmed_booking_";
+export const COMPLETED_BOOKING_IDS_KEY = "saafir_completed_booking_ids";
 
 export type ConfirmedBookingSnapshot = {
   version: 1;

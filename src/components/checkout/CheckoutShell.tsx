@@ -42,8 +42,9 @@ export function CheckoutShell({
     <div className="min-h-screen bg-surface font-body text-on-surface-variant">
       <header className="sticky top-0 z-40 border-b border-outline-variant/10 bg-surface/80 px-6 py-4 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <Link href="/" className="font-headline text-lg font-extrabold tracking-tight text-primary-container">
-            Ri7la
+          <Link href="/" className="flex items-center gap-2 text-primary-container">
+            <img src="/saafir-icon.svg" alt="" className="h-7 w-7" />
+            <img src="/saafir-wordmark.svg" alt="Saafir" className="h-5 w-auto" />
           </Link>
           <div className="flex items-center gap-2 text-on-surface-variant">
             <MaterialIcon name="lock" className="!text-lg" />

@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { applySnapshotToBooking, loadCompletedBookingIds, loadConfirmedSnapshot } from "@/lib/confirmedBooking";
@@ -10,6 +10,7 @@ import type { Booking } from "@/lib/types";
 import { getAccessToken } from "@/lib/auth";
 import { apiGetJsonData } from "@/lib/api";
 import { apiBookingRowToBooking, type ApiBookingRow } from "@/lib/apiBooking";
+import { formatDzd } from "@/lib/money";
 
 function statusPill(status: string) {
   if (status === "confirmed") return "bg-primary-fixed/40 text-on-primary-fixed-variant";
@@ -59,6 +60,7 @@ function canMessageDriverOnBooking(b: Booking) {
 export function PassengerBookingsList({ initialBookings = [] }: Props) {
   const t = useTranslations("bookings");
   const tMsg = useTranslations("messaging");
+  const locale = useLocale();
   const [rows, setRows] = useState<Booking[]>(initialBookings);
   const [ticketTripIds, setTicketTripIds] = useState<Set<string>>(() => snapshotTicketTripIds());
   const [loading, setLoading] = useState(true);
@@ -103,10 +105,10 @@ export function PassengerBookingsList({ initialBookings = [] }: Props) {
     function onAuth() {
       void loadFromApi();
     }
-    window.addEventListener("ri7la_auth", onAuth);
+    window.addEventListener("saafir_auth", onAuth);
     return () => {
       cancelled = true;
-      window.removeEventListener("ri7la_auth", onAuth);
+      window.removeEventListener("saafir_auth", onAuth);
     };
   }, [loadFromApi]);
 
@@ -240,7 +242,9 @@ export function PassengerBookingsList({ initialBookings = [] }: Props) {
                   <div className="text-right">
                     <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{t("fieldTotal")}</div>
                     <div className="mt-1 text-sm font-extrabold text-on-surface">
-                      {b.totalPrice.amount.toLocaleString("fr-DZ")} {b.totalPrice.currency}
+                      <span dir="ltr" className="tabular-nums">
+                        {formatDzd(b.totalPrice.amount, locale)} {b.totalPrice.currency}
+                      </span>
                     </div>
                   </div>
                 </div>

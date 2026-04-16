@@ -13,9 +13,10 @@ export function BusTripNav() {
       <div className="flex items-center gap-8 md:gap-12">
         <Link
           href="/"
-          className="font-headline text-2xl font-bold tracking-tight text-primary"
+          className="flex items-center gap-2 text-primary"
         >
-          Ri7la
+          <img src="/saafir-icon.svg" alt="" className="h-8 w-8" />
+          <img src="/saafir-wordmark.svg" alt="Saafir" className="h-6 w-auto" />
         </Link>
         <nav className="hidden gap-8 font-headline text-sm font-semibold md:flex">
           {nav.map((item) => (

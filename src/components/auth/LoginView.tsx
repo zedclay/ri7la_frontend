@@ -36,8 +36,8 @@ export function LoginView({ showAuthError = false }: Props) {
           />
           <div className="relative z-20 flex h-full w-full flex-col justify-between p-12 lg:p-20">
             <Link href="/" className="flex w-fit items-center gap-2 text-white">
-              <MaterialIcon name="commute" className="!text-4xl" />
-              <span className="font-headline text-3xl font-extrabold tracking-tight">Ri7la</span>
+              <img src="/saafir-icon.svg" alt="" className="h-10 w-10" />
+              <img src="/saafir-wordmark.svg" alt="Saafir" className="h-8 w-auto" />
             </Link>
             <div className="max-w-xl">
               <h2 className="mb-6 font-headline text-5xl font-bold leading-tight text-white lg:text-6xl">
@@ -59,10 +59,8 @@ export function LoginView({ showAuthError = false }: Props) {
           <div className="w-full max-w-md">
             <div className="mb-8 flex justify-center md:hidden">
               <Link href="/" className="flex items-center gap-2">
-                <MaterialIcon name="commute" className="!text-3xl text-primary" />
-                <span className="font-headline text-2xl font-extrabold tracking-tight text-primary">
-                  Ri7la
-                </span>
+                <img src="/saafir-icon.svg" alt="" className="h-9 w-9" />
+                <img src="/saafir-wordmark.svg" alt="Saafir" className="h-7 w-auto" />
               </Link>
             </div>
             <Suspense>

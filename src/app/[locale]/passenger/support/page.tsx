@@ -103,7 +103,7 @@ export default function PassengerSupportPage() {
             type="button"
             className="mt-6 rounded-full bg-white px-6 py-3 text-sm font-extrabold text-primary-container active:scale-95"
           >
-            Chat with Ri7laBot
+            Chat with SaafirBot
           </button>
         </div>
       </div>

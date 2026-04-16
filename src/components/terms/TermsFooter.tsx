@@ -14,11 +14,12 @@ export function TermsFooter() {
     <footer className="mt-20 w-full border-t border-slate-200 bg-surface-container-low font-body">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-8 py-12 md:flex-row">
         <div className="flex flex-col items-center gap-2 md:items-start">
-          <span className="font-headline text-lg font-bold text-primary-container">
-            Ri7la
+          <span className="flex items-center gap-2">
+            <img src="/saafir-icon.svg" alt="" className="h-8 w-8" />
+            <img src="/saafir-wordmark.svg" alt="Saafir" className="h-6 w-auto" />
           </span>
           <p className="text-xs text-slate-500">
-            © {new Date().getFullYear()} Ri7la Technologies. All rights reserved.
+            © {new Date().getFullYear()} Saafir Technologies. All rights reserved.
           </p>
         </div>
         <div className="flex flex-wrap justify-center gap-6 md:gap-8">

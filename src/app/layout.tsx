@@ -1,5 +1,6 @@
 import { Inter, Manrope, Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
+import { getLocale } from "next-intl/server";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -22,15 +23,17 @@ const notoArabic = Noto_Sans_Arabic({
   display: "swap",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const isRtl = locale === "ar";
   return (
     <html
-      lang="ar"
-      dir="rtl"
+      lang={locale}
+      dir={isRtl ? "rtl" : "ltr"}
       className={`${manrope.variable} ${inter.variable} ${notoArabic.variable} h-full scroll-smooth antialiased`}
       suppressHydrationWarning
     >

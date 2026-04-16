@@ -5,13 +5,16 @@ export function CarpoolTripFooter() {
     <footer className="w-full bg-surface-container-low pb-8 pt-16">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-6 md:grid-cols-2">
         <div className="space-y-4">
-          <div className="text-lg font-bold text-slate-900">Ri7la</div>
+          <div className="flex items-center gap-2">
+            <img src="/saafir-icon.svg" alt="" className="h-9 w-9" />
+            <img src="/saafir-wordmark.svg" alt="Saafir" className="h-7 w-auto" />
+          </div>
           <p className="max-w-sm font-body text-sm text-slate-500">
             Empowering seamless journeys across Algeria through trust-based carpooling and modern
             transportation technology.
           </p>
           <div className="font-body text-sm text-slate-500">
-            © {new Date().getFullYear()} Ri7la. All rights reserved.
+            © {new Date().getFullYear()} Saafir. All rights reserved.
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">

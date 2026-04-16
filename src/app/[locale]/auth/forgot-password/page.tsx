@@ -1,31 +1,18 @@
 import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { PublicHeader } from "@/components/layout/PublicHeader";
+import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 
 export const metadata: Metadata = {
-  title: "Mot de passe oublié — Ri7la",
-  description: "Réinitialisez votre mot de passe Ri7la ou contactez le support.",
+  title: "Mot de passe oublié — Saafir",
+  description: "Réinitialisez votre mot de passe Saafir ou contactez le support.",
 };
 
 export default function ForgotPasswordPage() {
   return (
     <div className="flex min-h-screen flex-col bg-surface">
-      <header className="flex items-center justify-between px-6 py-5">
-        <Link href="/" className="font-headline text-lg font-extrabold tracking-tight text-primary-container">
-          Ri7la
-        </Link>
-        <div className="flex items-center gap-3">
-          <Link href="/auth/login" className="text-sm font-semibold text-on-surface-variant hover:text-primary">
-            Log In
-          </Link>
-          <Link
-            href="/auth/signup"
-            className="rounded-full bg-primary-container px-5 py-2 text-sm font-bold text-on-primary"
-          >
-            Sign Up
-          </Link>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="mx-auto flex w-full max-w-xl flex-1 items-center justify-center px-6 pb-20">
         <div className="w-full rounded-2xl bg-surface-container-lowest p-10 shadow-[0_24px_48px_-12px_rgba(0,83,91,0.12)]">
@@ -40,35 +27,8 @@ export default function ForgotPasswordPage() {
             Entrez votre adresse e-mail ou votre numéro de téléphone pour recevoir un code de réinitialisation.
           </p>
 
-          <div className="mt-10 space-y-3">
-            <label htmlFor="identifier" className="text-sm font-semibold text-on-surface">
-              Email ou Téléphone
-            </label>
-            <div className="group relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                <MaterialIcon
-                  name="mail"
-                  className="!text-xl text-outline transition-colors group-focus-within:text-primary"
-                />
-              </div>
-              <input
-                id="identifier"
-                name="identifier"
-                type="text"
-                placeholder="exemple@email.com"
-                className="block w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-11 pr-4 text-on-surface outline-none transition-all placeholder:text-outline focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <Link
-              href="/auth/reset-password"
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-4 font-headline font-bold text-on-primary shadow-lg shadow-primary/10 transition-all active:scale-95"
-            >
-              Envoyer le code
-              <MaterialIcon name="arrow_forward" className="!text-xl" />
-            </Link>
+          <div className="mt-10">
+            <ForgotPasswordForm />
             <Link
               href="/auth/login"
               className="mt-6 flex items-center justify-center gap-2 text-sm font-semibold text-primary-container hover:underline"
@@ -82,14 +42,17 @@ export default function ForgotPasswordPage() {
 
       <footer className="border-t border-outline-variant/10 bg-surface-container-low px-6 py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-xs text-on-surface-variant md:flex-row">
-          <div className="font-headline font-bold text-primary-container">Ri7la</div>
+          <div className="flex items-center gap-2">
+            <img src="/saafir-icon.svg" alt="" className="h-7 w-7" />
+            <img src="/saafir-wordmark.svg" alt="Saafir" className="h-5 w-auto" />
+          </div>
           <div className="flex flex-wrap justify-center gap-6">
             <Link href="/privacy" className="hover:text-primary">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-primary">Terms of Service</Link>
             <Link href="/help" className="hover:text-primary">Help Center</Link>
             <Link href="/help" className="hover:text-primary">Contact Us</Link>
           </div>
-          <div>© {new Date().getFullYear()} Ri7la. All rights reserved.</div>
+          <div>© {new Date().getFullYear()} Saafir. All rights reserved.</div>
         </div>
       </footer>
     </div>

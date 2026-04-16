@@ -122,16 +122,16 @@ export function DriverOnboardingForm() {
       setUserId(currentDriverDraftUserId());
     }
     syncUserId();
-    window.addEventListener("ri7la_auth", syncUserId);
-    return () => window.removeEventListener("ri7la_auth", syncUserId);
+    window.addEventListener("saafir_auth", syncUserId);
+    return () => window.removeEventListener("saafir_auth", syncUserId);
   }, []);
 
   useEffect(() => {
     function onReview() {
       setReviewTick((x) => x + 1);
     }
-    window.addEventListener("ri7la_driver_review", onReview);
-    return () => window.removeEventListener("ri7la_driver_review", onReview);
+    window.addEventListener("saafir_driver_review", onReview);
+    return () => window.removeEventListener("saafir_driver_review", onReview);
   }, []);
 
   /** Sync verification before redirect / step logic so sessionStorage has server review state. */
@@ -372,7 +372,7 @@ export function DriverOnboardingForm() {
       email: profileEmail.trim() || undefined,
     });
     try {
-      window.dispatchEvent(new Event("ri7la_driver_onboarding"));
+      window.dispatchEvent(new Event("saafir_driver_onboarding"));
     } catch {
       /* noop */
     }
@@ -440,7 +440,7 @@ export function DriverOnboardingForm() {
       plateNumber: plateFull,
     });
     try {
-      window.dispatchEvent(new Event("ri7la_driver_onboarding"));
+      window.dispatchEvent(new Event("saafir_driver_onboarding"));
     } catch {
       /* noop */
     }

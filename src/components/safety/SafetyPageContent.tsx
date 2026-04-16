@@ -65,7 +65,7 @@ export function SafetyPageContent() {
               <span className="text-primary-container">notre priorité absolue.</span>
             </h1>
             <p className="mb-10 max-w-xl text-lg leading-relaxed text-on-surface-variant lg:text-xl">
-              Chez Ri7la, nous redéfinissons le voyage en Algérie avec une approche centrée sur
+              Chez Saafir, nous redéfinissons le voyage en Algérie avec une approche centrée sur
               l&apos;humain et une technologie de pointe pour garantir chaque trajet.
             </p>
             <div className="flex flex-wrap gap-4">
@@ -117,7 +117,7 @@ export function SafetyPageContent() {
               Les Piliers de notre Confiance
             </h2>
             <p className="max-w-2xl text-on-surface-variant">
-              Quatre fondements essentiels qui font de Ri7la le choix numéro un pour les voyageurs
+              Quatre fondements essentiels qui font de Saafir le choix numéro un pour les voyageurs
               exigeants.
             </p>
           </div>
@@ -240,7 +240,7 @@ export function SafetyPageContent() {
           Prêt à voyager en toute sérénité ?
         </h2>
         <p className="mb-12 text-lg text-on-surface-variant">
-          Rejoignez des milliers d&apos;utilisateurs qui font confiance à Ri7la pour leurs
+          Rejoignez des milliers d&apos;utilisateurs qui font confiance à Saafir pour leurs
           déplacements quotidiens et leurs aventures à travers le pays.
         </p>
         <div className="flex flex-col justify-center gap-4 sm:flex-row">

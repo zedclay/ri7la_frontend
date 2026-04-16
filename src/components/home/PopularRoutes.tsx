@@ -2,6 +2,7 @@ import { Link } from "@/i18n/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { getPlaceByCityKey, placePrimaryLabel } from "@/lib/algeriaPlaces";
+import { formatDzd } from "@/lib/money";
 
 export async function PopularRoutes() {
   const t = await getTranslations("common");
@@ -11,7 +12,7 @@ export async function PopularRoutes() {
     fromKey: string;
     toKey: string;
     duration: string;
-    price: string;
+    priceAmount: number;
     carpool: boolean;
     bus: boolean;
   }[] = [
@@ -19,7 +20,7 @@ export async function PopularRoutes() {
       fromKey: "Algiers",
       toKey: "Oran",
       duration: t("routeDur1"),
-      price: "1 200 DA",
+      priceAmount: 1200,
       carpool: true,
       bus: true,
     },
@@ -27,7 +28,7 @@ export async function PopularRoutes() {
       fromKey: "Algiers",
       toKey: "Constantine",
       duration: t("routeDur2"),
-      price: "1 500 DA",
+      priceAmount: 1500,
       carpool: true,
       bus: true,
     },
@@ -35,7 +36,7 @@ export async function PopularRoutes() {
       fromKey: "Oran",
       toKey: "Tlemcen",
       duration: t("routeDur3"),
-      price: "800 DA",
+      priceAmount: 800,
       carpool: true,
       bus: false,
     },
@@ -88,7 +89,9 @@ export async function PopularRoutes() {
                     <span className="block text-xs font-medium text-on-surface-variant">
                       {t("fromPrice")}
                     </span>
-                    <span className="text-xl font-bold text-primary">{r.price}</span>
+                    <span dir="ltr" className="text-xl font-bold text-primary tabular-nums">
+                      {formatDzd(r.priceAmount, locale)} DA
+                    </span>
                   </div>
                 </div>
                 <div className="flex gap-2">

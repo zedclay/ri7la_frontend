@@ -11,7 +11,10 @@ export function AuthTransactionFooter({ variant }: { variant: Variant }) {
     return (
       <footer className="w-full border-t border-slate-100 bg-slate-50 py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-8 md:flex-row">
-          <div className="font-headline text-lg font-bold text-primary-container">Ri7la</div>
+          <div className="flex items-center gap-2">
+            <img src="/saafir-icon.svg" alt="" className="h-8 w-8" />
+            <img src="/saafir-wordmark.svg" alt="Saafir" className="h-6 w-auto" />
+          </div>
           <div className="flex flex-wrap justify-center gap-6">
             <Link
               href="/privacy"

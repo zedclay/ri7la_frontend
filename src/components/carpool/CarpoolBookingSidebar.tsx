@@ -1,12 +1,13 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { getAccessToken } from "@/lib/auth";
 import { fetchUserMeClientCached } from "@/lib/userMeClientCache";
 import { useIsTripOwner } from "@/lib/useIsTripOwner";
+import { formatDzd } from "@/lib/money";
 
 type Props = {
   pricePerSeat: number;
@@ -28,6 +29,7 @@ export function CarpoolBookingSidebar({
   tripOwnerUserId,
 }: Props) {
   const t = useTranslations("common");
+  const locale = useLocale();
   const isOwner = useIsTripOwner(tripOwnerUserId);
   const [seats, setSeats] = useState(1);
   const [passengerNeedsIdentity, setPassengerNeedsIdentity] = useState(false);
@@ -62,7 +64,7 @@ export function CarpoolBookingSidebar({
   const bookBlocked = Boolean(checkoutHref && passengerNeedsIdentity);
 
   const total = useMemo(() => seats * pricePerSeat, [seats, pricePerSeat]);
-  const formattedTotal = total.toLocaleString("fr-DZ");
+  const formattedTotal = formatDzd(total, locale);
 
   if (tripOwnerUserId && isOwner === "pending") {
     return (
@@ -108,10 +110,12 @@ export function CarpoolBookingSidebar({
         <div className="mb-8 flex items-baseline justify-between">
           <span className="font-medium text-on-surface-variant">Price per seat</span>
           <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-extrabold text-on-surface">
-              {pricePerSeat.toLocaleString("fr-DZ")}
+            <span dir="ltr" className="text-3xl font-extrabold text-on-surface tabular-nums">
+              {formatDzd(pricePerSeat, locale)}
             </span>
-            <span className="text-lg font-bold text-on-surface-variant">{currency}</span>
+            <span dir="ltr" className="text-lg font-bold text-on-surface-variant">
+              {currency}
+            </span>
           </div>
         </div>
 
@@ -159,7 +163,7 @@ export function CarpoolBookingSidebar({
               <span>
                 Total for {seats} seat{seats > 1 ? "s" : ""}
               </span>
-              <span>
+              <span dir="ltr" className="tabular-nums">
                 {formattedTotal} DZD
               </span>
             </div>
@@ -222,7 +226,7 @@ export function CarpoolBookingSidebar({
           Safety First
         </div>
         <p className="text-xs leading-relaxed text-on-tertiary-fixed-variant">
-          Always check the vehicle plate matches the app. Travel safe with Ri7la.
+          Always check the vehicle plate matches the app. Travel safe with Saafir.
         </p>
       </div>
     </div>

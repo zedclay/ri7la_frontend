@@ -1,6 +1,6 @@
 import type { PaymentMethod } from "@/lib/types";
 
-const PREFIX = "ri7la_checkout_";
+const PREFIX = "saafir_checkout_";
 
 export type PassengerCheckoutDraft = {
   fullName: string;

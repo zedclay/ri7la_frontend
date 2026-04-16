@@ -16,7 +16,8 @@ export function VerifyAccountClient() {
   const t = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const flow = searchParams.get("flow") === "login" ? "login" : "signup";
+  const flowParam = searchParams.get("flow");
+  const flow = flowParam === "reset" ? "reset" : flowParam === "signup" ? "signup" : "signup";
   const phone = searchParams.get("phone")?.trim() ?? "";
   const roleParam = searchParams.get("role");
   const next = searchParams.get("next") ?? undefined;
@@ -32,15 +33,22 @@ export function VerifyAccountClient() {
   const [resentHint, setResentHint] = useState(false);
   const [profileFullName, setProfileFullName] = useState("");
   const [profileEmail, setProfileEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const code = digits.join("");
   const isSignup = flow === "signup";
+  const isReset = flow === "reset";
   const profileOk =
     !isSignup ||
     (profileFullName.trim().length >= 2 && isValidEmail(profileEmail));
+  const passwordOk =
+    (isSignup || isReset) ? password.trim().length >= 8 && password === confirmPassword : true;
   const canVerify =
-    phone.length > 0 && profileOk && code.length === 4 && digits.every((d) => d.length === 1);
+    phone.length > 0 && profileOk && passwordOk && code.length === 4 && digits.every((d) => d.length === 1);
 
   useEffect(() => {
     if (!isSignup) return;
@@ -50,6 +58,13 @@ export function VerifyAccountClient() {
       setProfileEmail(stored.email);
     }
   }, [isSignup]);
+
+  useEffect(() => {
+    if (flowParam !== "login") return;
+    const qs = new URLSearchParams();
+    if (next) qs.set("next", next);
+    router.replace(`/auth/login${qs.toString() ? `?${qs.toString()}` : ""}`);
+  }, [flowParam, next, router]);
 
   useEffect(() => {
     inputRefs.current[0]?.focus();
@@ -63,38 +78,40 @@ export function VerifyAccountClient() {
     });
   }
 
-  function dashboardForRoles(roles: string[]) {
-    if (roles.includes("ADMIN")) return "/admin";
-    if (roles.includes("DRIVER")) return "/driver";
-    return "/passenger/bookings";
-  }
-
   async function handleVerify() {
     setError(null);
     if (!canVerify) return;
     try {
+      if (isReset) {
+        await apiPostJsonData<{ ok: true }>("/api/auth/otp/verify", {
+          phone,
+          code,
+          flow: "PASSWORD_RESET",
+          newPassword: password,
+        });
+        router.replace("/auth/login");
+        return;
+      }
+
       const body: Record<string, unknown> = {
         phone,
         code,
-        flow: flow === "signup" ? "SIGNUP" : "LOGIN",
+        flow: "SIGNUP",
+        role: role === "driver" ? "DRIVER" : "PASSENGER",
+        fullName: profileFullName.trim(),
+        email: profileEmail.trim().toLowerCase(),
+        password,
       };
-      if (flow === "signup") {
-        body.role = role === "driver" ? "DRIVER" : "PASSENGER";
-        body.fullName = profileFullName.trim();
-        body.email = profileEmail.trim().toLowerCase();
-      }
+
       const res = await apiPostJsonData<{
         user: { roles: string[] };
         tokens: { accessToken: string; refreshToken: string };
       }>("/api/auth/otp/verify", body);
+
       setAuthTokens(res.tokens);
-      if (flow === "signup") {
-        clearSignupProfile();
-        if (res.user.roles.includes("DRIVER")) router.replace("/driver/onboarding");
-        else router.replace(next || "/passenger/profile");
-        return;
-      }
-      router.replace(next || dashboardForRoles(res.user.roles));
+      clearSignupProfile();
+      if (res.user.roles.includes("DRIVER")) router.replace("/driver/onboarding");
+      else router.replace(next || "/passenger/profile");
     } catch (e2) {
       setError(e2 instanceof Error ? e2.message : t("failedVerification"));
     }
@@ -103,8 +120,9 @@ export function VerifyAccountClient() {
   return (
     <div className="flex min-h-[100dvh] flex-col bg-surface">
       <header className="flex h-[72px] items-center justify-between px-6">
-        <Link href="/" className="font-headline text-lg font-extrabold tracking-tight text-primary-container">
-          Ri7la
+        <Link href="/" className="flex items-center gap-2 text-primary-container">
+          <img src="/saafir-icon.svg" alt="" className="h-7 w-7" />
+          <img src="/saafir-wordmark.svg" alt="Saafir" className="h-5 w-auto" />
         </Link>
         <div className="flex items-center gap-4 text-on-surface-variant">
           <Link href="/help" className="rounded-full p-2 hover:bg-surface-container-high">
@@ -177,6 +195,115 @@ export function VerifyAccountClient() {
                   placeholder={t("signupEmailPlaceholder")}
                   className="w-full rounded-xl border-none bg-surface-container-low px-4 py-3 text-base font-medium text-on-surface outline-none focus:ring-2 focus:ring-primary md:text-sm"
                 />
+              </div>
+
+              <div>
+                <label htmlFor="verify-password" className="mb-1.5 block text-xs font-bold text-on-surface-variant">
+                  {t("password")}
+                </label>
+                <div className="relative">
+                  <input
+                    id="verify-password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border-none bg-surface-container-low px-4 py-3 pe-12 text-base font-medium text-on-surface outline-none focus:ring-2 focus:ring-primary md:text-sm"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 end-0 flex items-center pe-4 text-outline transition-colors hover:text-primary"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+                  >
+                    <MaterialIcon name={showPassword ? "visibility_off" : "visibility"} />
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="verify-confirmPassword" className="mb-1.5 block text-xs font-bold text-on-surface-variant">
+                  {t("confirmPassword")}
+                </label>
+                <div className="relative">
+                  <input
+                    id="verify-confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border-none bg-surface-container-low px-4 py-3 pe-12 text-base font-medium text-on-surface outline-none focus:ring-2 focus:ring-primary md:text-sm"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 end-0 flex items-center pe-4 text-outline transition-colors hover:text-primary"
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    aria-label={showConfirmPassword ? t("hidePassword") : t("showPassword")}
+                  >
+                    <MaterialIcon name={showConfirmPassword ? "visibility_off" : "visibility"} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {isReset ? (
+            <div className="mt-8 space-y-4 rounded-xl border border-outline-variant/20 bg-surface-container-low/60 p-5">
+              <div>
+                <h2 className="font-headline text-lg font-extrabold text-on-surface">{t("resetPasswordTitle")}</h2>
+                <p className="mt-1 text-sm text-on-surface-variant">{t("resetPasswordHint")}</p>
+              </div>
+
+              <div>
+                <label htmlFor="reset-password" className="mb-1.5 block text-xs font-bold text-on-surface-variant">
+                  {t("newPassword")}
+                </label>
+                <div className="relative">
+                  <input
+                    id="reset-password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border-none bg-surface-container-low px-4 py-3 pe-12 text-base font-medium text-on-surface outline-none focus:ring-2 focus:ring-primary md:text-sm"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 end-0 flex items-center pe-4 text-outline transition-colors hover:text-primary"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+                  >
+                    <MaterialIcon name={showPassword ? "visibility_off" : "visibility"} />
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="reset-confirmPassword" className="mb-1.5 block text-xs font-bold text-on-surface-variant">
+                  {t("confirmNewPassword")}
+                </label>
+                <div className="relative">
+                  <input
+                    id="reset-confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border-none bg-surface-container-low px-4 py-3 pe-12 text-base font-medium text-on-surface outline-none focus:ring-2 focus:ring-primary md:text-sm"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 end-0 flex items-center pe-4 text-outline transition-colors hover:text-primary"
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    aria-label={showConfirmPassword ? t("hidePassword") : t("showPassword")}
+                  >
+                    <MaterialIcon name={showConfirmPassword ? "visibility_off" : "visibility"} />
+                  </button>
+                </div>
               </div>
             </div>
           ) : null}
@@ -279,7 +406,7 @@ export function VerifyAccountClient() {
                     setError(null);
                     await apiPostJsonData<{ ok: boolean }>("/api/auth/otp/request", {
                       phone,
-                      flow: flow === "signup" ? "SIGNUP" : "LOGIN",
+                      flow: flow === "signup" ? "SIGNUP" : "PASSWORD_RESET",
                       role: flow === "signup" ? (role === "driver" ? "DRIVER" : "PASSENGER") : undefined,
                     });
                     setResentHint(true);
@@ -304,7 +431,7 @@ export function VerifyAccountClient() {
                 if (flow === "signup") {
                   clearSignupProfile();
                   router.replace("/auth/signup");
-                } else router.replace("/auth/login");
+                } else router.replace("/auth/forgot-password");
               }}
             >
               {t("changeContact")}
@@ -315,7 +442,10 @@ export function VerifyAccountClient() {
 
       <footer className="border-t border-outline-variant/10 bg-surface-container-low px-6 py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-xs text-on-surface-variant md:flex-row">
-          <div className="font-headline font-bold text-primary-container">Ri7la</div>
+          <div className="flex items-center gap-2">
+            <img src="/saafir-icon.svg" alt="" className="h-7 w-7" />
+            <img src="/saafir-wordmark.svg" alt="Saafir" className="h-5 w-auto" />
+          </div>
           <div>
             {t("verifyFooterNote", { year: new Date().getFullYear(), rights: t("rights") })}
           </div>

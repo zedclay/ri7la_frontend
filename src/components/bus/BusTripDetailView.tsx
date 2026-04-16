@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { busCoverImage } from "@/lib/coverImages";
 import { splitTicketPrice } from "@/lib/tripPricing";
 import { unwrapApiSuccess } from "@/lib/unwrapApi";
+import { formatDzd } from "@/lib/money";
 
 const MAP_IMG =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuA4QJbl2WB3EvJStVI7ImvvHPulYUE7zWbIzfz_ZT8hXW5dLMZGRjDGssUFxSssdeFqswnxTDPmbI0QsGzZy4b52_lHC9l_7530GvzSFU2yhO8w3Liw7ULXKYv8tpQ1Da3u9K0hgchvzTF1rFMz8wSXvCnUETRkmEL2MSMwdIqnwqhOx0YpwNYkuE6XrUmSfBvGAlSlqQs3AbrH-dEiD555A-iw_NCWBb_FuDdSBpFCKTqLYZgHMtK8C3j_S7ZV-YcOBjIWdYxS5y9E";
@@ -36,6 +38,7 @@ function formatDurationMs(ms: number): string {
 }
 
 export function BusTripDetailView({ departureId }: { departureId: string }) {
+  const locale = useLocale();
   const [trip, setTrip] = useState<ApiTrip | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -381,19 +384,21 @@ export function BusTripDetailView({ departureId }: { departureId: string }) {
             <div className="space-y-2 pt-4">
               <div className="flex justify-between text-sm">
                 <span className="text-on-surface-variant">Base Fare</span>
-                <span className="font-medium text-on-surface">
-                  {baseFare.toLocaleString("fr-DZ")} DZD
+                <span dir="ltr" className="font-medium text-on-surface tabular-nums">
+                  {formatDzd(baseFare, locale)} DZD
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-on-surface-variant">Service Fee</span>
-                <span className="font-medium text-on-surface">
-                  {serviceFee.toLocaleString("fr-DZ")} DZD
+                <span dir="ltr" className="font-medium text-on-surface tabular-nums">
+                  {formatDzd(serviceFee, locale)} DZD
                 </span>
               </div>
               <div className="mt-2 flex justify-between border-t border-outline-variant/20 pt-4 text-lg font-bold text-on-surface">
                 <span>Total Price</span>
-                <span className="text-primary">{total.toLocaleString("fr-DZ")} DZD</span>
+                <span dir="ltr" className="text-primary tabular-nums">
+                  {formatDzd(total, locale)} DZD
+                </span>
               </div>
             </div>
           </div>

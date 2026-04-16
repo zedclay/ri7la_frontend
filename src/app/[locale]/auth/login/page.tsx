@@ -10,7 +10,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "common" });
   return {
-    title: `${t("loginTitle")} — Ri7la`,
+    title: `${t("loginTitle")} — Saafir`,
     description: t("metaLoginDescription"),
   };
 }

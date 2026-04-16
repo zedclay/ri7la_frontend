@@ -13,9 +13,10 @@ export function TermsNav() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-8">
         <Link
           href="/"
-          className="text-2xl font-bold tracking-tight text-primary-container"
+          className="flex items-center gap-2 text-primary-container"
         >
-          Ri7la
+          <img src="/saafir-icon.svg" alt="" className="h-8 w-8" />
+          <img src="/saafir-wordmark.svg" alt="Saafir" className="h-6 w-auto" />
         </Link>
         <div className="hidden items-center gap-8 md:flex">
           {links.map((item) => (

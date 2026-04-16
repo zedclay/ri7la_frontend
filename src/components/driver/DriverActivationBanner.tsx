@@ -25,14 +25,14 @@ export function DriverActivationBanner() {
     }
     void refresh();
     window.addEventListener("focus", refresh);
-    window.addEventListener("ri7la_auth", refresh);
-    window.addEventListener("ri7la_driver_review", refresh);
-    window.addEventListener("ri7la_driver_onboarding", refresh);
+    window.addEventListener("saafir_auth", refresh);
+    window.addEventListener("saafir_driver_review", refresh);
+    window.addEventListener("saafir_driver_onboarding", refresh);
     return () => {
       window.removeEventListener("focus", refresh);
-      window.removeEventListener("ri7la_auth", refresh);
-      window.removeEventListener("ri7la_driver_review", refresh);
-      window.removeEventListener("ri7la_driver_onboarding", refresh);
+      window.removeEventListener("saafir_auth", refresh);
+      window.removeEventListener("saafir_driver_review", refresh);
+      window.removeEventListener("saafir_driver_onboarding", refresh);
     };
   }, []);
 

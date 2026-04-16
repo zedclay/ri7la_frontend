@@ -11,8 +11,9 @@ export function SafetyNav() {
   return (
     <nav className="fixed top-0 z-50 w-full bg-white/80 shadow-sm backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-12">
-        <Link href="/" className="font-headline text-2xl font-bold tracking-tight text-primary-container">
-          Ri7la
+        <Link href="/" className="flex items-center gap-2 text-primary-container">
+          <img src="/saafir-icon.svg" alt="" className="h-8 w-8" />
+          <img src="/saafir-wordmark.svg" alt="Saafir" className="h-6 w-auto" />
         </Link>
         <div className="hidden items-center gap-8 md:flex">
           {links.map((item) => (

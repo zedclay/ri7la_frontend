@@ -23,8 +23,9 @@ export function PassengerSidebar() {
   return (
     <aside className="hidden w-72 shrink-0 border-r border-outline-variant/10 bg-surface-container-lowest p-6 lg:block">
       <div className="mb-10 flex items-center justify-between">
-        <Link href="/" className="font-headline text-xl font-extrabold text-primary-container">
-          Ri7la
+        <Link href="/" className="flex items-center gap-2 text-primary-container">
+          <img src="/saafir-icon.svg" alt="" className="h-8 w-8" />
+          <img src="/saafir-wordmark.svg" alt="Saafir" className="h-6 w-auto" />
         </Link>
         <span className="rounded-full bg-secondary-container px-3 py-1 text-[10px] font-bold text-on-secondary-fixed-variant">
           {t("premiumMember")}

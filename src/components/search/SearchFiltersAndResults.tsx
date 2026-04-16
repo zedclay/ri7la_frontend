@@ -12,6 +12,7 @@ import { busCoverImage, coverForCarMake, trainCoverImage } from "@/lib/coverImag
 import { splitTicketPrice } from "@/lib/tripPricing";
 import { mockSearchResults } from "@/lib/mockData";
 import { allowDemoMocks } from "@/lib/runtimeEnv";
+import { formatDzd } from "@/lib/money";
 import type { SearchResult } from "@/lib/types";
 
 const DRIVER_IMG =
@@ -269,6 +270,7 @@ export function SearchFiltersAndResults() {
     async function load() {
       setApiError(null);
       const { from, to, date } = requestParams;
+      const useMocks = allowDemoMocks();
 
       if (!carpool) {
         setApiCarpools([]);
@@ -299,7 +301,7 @@ export function SearchFiltersAndResults() {
               if (cancelled) return;
               setApiFailedCarpool(true);
               setApiCarpools([]);
-              setApiError(e instanceof Error ? e.message : tSearch("errorLoadCarpoolOffers"));
+              if (!useMocks) setApiError(e instanceof Error ? e.message : tSearch("errorLoadCarpoolOffers"));
             }
           })()
         );
@@ -319,7 +321,7 @@ export function SearchFiltersAndResults() {
               if (cancelled) return;
               setApiFailedBus(true);
               setApiBuses([]);
-              setApiError((prev) => prev ?? (e instanceof Error ? e.message : tSearch("errorLoadBusOffers")));
+              if (!useMocks) setApiError((prev) => prev ?? (e instanceof Error ? e.message : tSearch("errorLoadBusOffers")));
             }
           })()
         );
@@ -339,7 +341,7 @@ export function SearchFiltersAndResults() {
               if (cancelled) return;
               setApiFailedTrain(true);
               setApiTrains([]);
-              setApiError((prev) => prev ?? (e instanceof Error ? e.message : tSearch("errorLoadTrainOffers")));
+              if (!useMocks) setApiError((prev) => prev ?? (e instanceof Error ? e.message : tSearch("errorLoadTrainOffers")));
             }
           })()
         );
@@ -498,7 +500,9 @@ export function SearchFiltersAndResults() {
               <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
                 {tSearch("priceRange")}
               </p>
-              <span className="text-xs font-bold text-primary">{priceMax} DZD</span>
+              <span dir="ltr" className="text-xs font-bold text-primary tabular-nums">
+                {formatDzd(priceMax, locale)} DZD
+              </span>
             </div>
             <input
               type="range"
@@ -748,7 +752,9 @@ export function SearchFiltersAndResults() {
                     <div className="flex flex-col justify-between border-t border-outline-variant/15 pt-4 md:w-52 md:border-l md:border-t-0 md:pl-6 md:pt-0">
                       <div className="text-right">
                         <p className="text-2xl font-extrabold text-primary">
-                          {itemPrice(item)} <span className="text-xs font-bold">DZD</span>
+                          <span dir="ltr" className="tabular-nums">
+                            {formatDzd(itemPrice(item), locale)} <span className="text-xs font-bold">DZD</span>
+                          </span>
                         </p>
 
                         {item.mode === "carpool" ? (

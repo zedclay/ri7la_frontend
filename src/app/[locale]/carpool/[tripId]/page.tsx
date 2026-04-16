@@ -12,8 +12,8 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { tripId } = await params;
   return {
-    title: `Trip details — Ri7la`,
-    description: `Carpool trip ${tripId}. Book seats from Algiers to Oran on Ri7la.`,
+    title: `Trip details — Saafir`,
+    description: `Carpool trip ${tripId}. Book seats from Algiers to Oran on Saafir.`,
   };
 }
 

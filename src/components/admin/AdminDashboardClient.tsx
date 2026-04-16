@@ -104,7 +104,7 @@ export function AdminDashboardClient() {
         <div>
           <h1 className="font-headline text-3xl font-extrabold text-on-surface">Operations Dashboard</h1>
           <p className="mt-1 text-on-surface-variant">
-            Live counts from the Ri7la API. Use the sidebar for queues and entity management.
+            Live counts from the Saafir API. Use the sidebar for queues and entity management.
           </p>
         </div>
         <div className="flex flex-wrap gap-2 sm:gap-3">

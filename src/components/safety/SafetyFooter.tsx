@@ -6,9 +6,12 @@ export function SafetyFooter() {
     <footer className="w-full border-t border-slate-200 bg-slate-50 pb-8 pt-16">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-6 md:grid-cols-4 md:px-12 lg:grid-cols-6">
         <div className="col-span-2">
-          <div className="mb-4 font-headline text-xl font-bold text-primary-container">Ri7la</div>
+          <div className="mb-4 flex items-center gap-2">
+            <img src="/saafir-icon.svg" alt="" className="h-9 w-9" />
+            <img src="/saafir-wordmark.svg" alt="Saafir" className="h-7 w-auto" />
+          </div>
           <p className="mb-6 font-body text-sm leading-relaxed text-slate-500">
-            Ri7la Algérie : Votre compagnon de route pour des voyages sûrs, abordables et confortables
+            Saafir Algérie : Votre compagnon de route pour des voyages sûrs, abordables et confortables
             à travers toutes les wilayas.
           </p>
         </div>
@@ -92,7 +95,7 @@ export function SafetyFooter() {
       </div>
       <div className="mx-auto mt-16 max-w-7xl border-t border-slate-200 px-6 pt-8 text-center md:px-12">
         <p className="font-body text-xs text-slate-400">
-          © {new Date().getFullYear()} Ri7la Algeria. All rights reserved. Your safety is our
+          © {new Date().getFullYear()} Saafir Algeria. All rights reserved. Your safety is our
           priority.
         </p>
       </div>

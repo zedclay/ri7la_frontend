@@ -50,7 +50,7 @@ export function AdminSupportHub() {
       <div>
         <h1 className="font-headline text-3xl font-extrabold text-on-surface">Support &amp; operations</h1>
         <p className="mt-1 text-on-surface-variant">
-          Ri7la does not ship a separate ticketing API yet. Use these modules for real workflows; the feed below is live data from the{" "}
+          Saafir does not ship a separate ticketing API yet. Use these modules for real workflows; the feed below is live data from the{" "}
           <strong>audit log</strong>.
         </p>
       </div>

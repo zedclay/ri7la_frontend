@@ -20,8 +20,8 @@ export type DriverDocumentReview = {
   updatedAt?: string;
 };
 
-const KEY = (userId: string) => `ri7la_driver_doc_review_v1_${userId}`;
-const API_CACHE_KEY = (userId: string) => `ri7la_driver_verification_api_v1_${userId}`;
+const KEY = (userId: string) => `saafir_driver_doc_review_v1_${userId}`;
+const API_CACHE_KEY = (userId: string) => `saafir_driver_verification_api_v1_${userId}`;
 
 const defaultReview = (): DriverDocumentReview => ({
   identity: "pending",
@@ -60,7 +60,7 @@ function loadApiCache(userId: string): DriverDocumentReview | null {
 }
 
 /**
- * Pull verification status from the API (drivers only). Merges into sessionStorage; dispatch `ri7la_driver_review`.
+ * Pull verification status from the API (drivers only). Merges into sessionStorage; dispatch `saafir_driver_review`.
  */
 export async function syncDriverVerificationFromApi(userId: string): Promise<void> {
   if (typeof window === "undefined") return;
@@ -93,7 +93,7 @@ export async function syncDriverVerificationFromApi(userId: string): Promise<voi
     };
     sessionStorage.setItem(API_CACHE_KEY(userId), JSON.stringify(merged));
     try {
-      window.dispatchEvent(new Event("ri7la_driver_review"));
+      window.dispatchEvent(new Event("saafir_driver_review"));
     } catch {
       /* noop */
     }
@@ -126,7 +126,7 @@ export function saveDriverDocumentReview(userId: string, review: DriverDocumentR
   try {
     localStorage.setItem(KEY(userId), JSON.stringify(payload));
     try {
-      window.dispatchEvent(new Event("ri7la_driver_review"));
+      window.dispatchEvent(new Event("saafir_driver_review"));
     } catch {
       /* noop */
     }

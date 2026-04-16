@@ -1,4 +1,4 @@
-const KEY = "ri7laSignupProfile";
+const KEY = "saafirSignupProfile";
 
 export type SignupProfilePayload = {
   fullName: string;

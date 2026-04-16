@@ -155,10 +155,10 @@ export function DriverRequestsClient() {
     }
     refreshGates();
     window.addEventListener("focus", refreshGates);
-    window.addEventListener("ri7la_auth", refreshGates);
+    window.addEventListener("saafir_auth", refreshGates);
     return () => {
       window.removeEventListener("focus", refreshGates);
-      window.removeEventListener("ri7la_auth", refreshGates);
+      window.removeEventListener("saafir_auth", refreshGates);
     };
   }, []);
 
@@ -170,8 +170,8 @@ export function DriverRequestsClient() {
     function onAuth() {
       void load();
     }
-    window.addEventListener("ri7la_auth", onAuth);
-    return () => window.removeEventListener("ri7la_auth", onAuth);
+    window.addEventListener("saafir_auth", onAuth);
+    return () => window.removeEventListener("saafir_auth", onAuth);
   }, [load]);
 
   const pending = useMemo(() => {

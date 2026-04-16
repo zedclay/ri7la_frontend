@@ -11,7 +11,10 @@ export async function PublicFooter() {
     <footer className="w-full border-t border-slate-200 bg-[#f8fafb] px-6 py-16">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-5">
         <div className="space-y-6 lg:col-span-2">
-          <div className="text-2xl font-bold text-slate-900">Ri7la</div>
+          <div className="flex items-center gap-2 text-slate-900">
+            <img src="/saafir-icon.svg" alt="" className="h-9 w-9" />
+            <img src="/saafir-wordmark.svg" alt="Saafir" className="h-7 w-auto" />
+          </div>
           <p className="max-w-xs leading-relaxed text-slate-500">{t("footerBlurb")}</p>
           <div className="flex gap-4">
             <a

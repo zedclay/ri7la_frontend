@@ -11,7 +11,7 @@ function escapeHtml(s: string): string {
 export function buildTicketQrPayload(snapshot: ConfirmedBookingSnapshot): string {
   const b = snapshot.booking;
   return [
-    "RI7LA",
+    "SAAFIR",
     snapshot.bookingId,
     b.referenceCode,
     snapshot.ticketToken,
@@ -59,7 +59,7 @@ export function generateTicketHtml(snapshot: ConfirmedBookingSnapshot): string {
     '<html lang="fr">',
     "<head>",
     '<meta charset="utf-8"/>',
-    `<title>Billet Ri7la — ${ref}</title>`,
+    `<title>Billet Saafir — ${ref}</title>`,
     `<style>
       body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; padding: 24px; color: #0d2323; background: #f4faf9; }
       .card { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 28px; box-shadow: 0 8px 32px rgba(0,83,91,0.12); border: 1px solid #e0eeec; }
@@ -79,7 +79,7 @@ export function generateTicketHtml(snapshot: ConfirmedBookingSnapshot): string {
     "</head>",
     "<body>",
     '<div class="card">',
-    `<h1>Ri7la — ${escapeHtml(modeLabelFr(b.mode))}</h1>`,
+    `<h1>Saafir — ${escapeHtml(modeLabelFr(b.mode))}</h1>`,
     `<p class="muted">Billet électronique — présentez ce document (ou le QR) à l’embarquement.</p>`,
     `<p><span class="ref">Réf. ${ref}</span></p>`,
     `<p class="muted">Jeton billet : ${escapeHtml(ticketToken)} · Confirmé le ${escapeHtml(
@@ -133,7 +133,7 @@ export function generateTicketHtml(snapshot: ConfirmedBookingSnapshot): string {
 
   lines.push(
     `<div class="qr"><div class="label">QR d’embarquement</div><img src="${qrUrl}" width="220" height="220" alt="QR code billet"/></div>`,
-    '<p class="footer">Ri7la — démo MVP. Conservez ce billet sur votre téléphone.</p>',
+    '<p class="footer">Saafir — démo MVP. Conservez ce billet sur votre téléphone.</p>',
     "</div>",
     "</body>",
     "</html>"
@@ -145,7 +145,7 @@ export function generateTicketHtml(snapshot: ConfirmedBookingSnapshot): string {
 export function downloadTicketHtml(snapshot: ConfirmedBookingSnapshot, fileBaseName?: string): void {
   const html = generateTicketHtml(snapshot);
   const ref = snapshot.booking.referenceCode.replace(/\s+/g, "-");
-  const name = fileBaseName ?? `ri7la-billet-${ref}`;
+  const name = fileBaseName ?? `saafir-billet-${ref}`;
   const blob = new Blob([html], { type: "text/html;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -190,7 +190,7 @@ export async function downloadTicketPdf(
 
   doc.setFontSize(16);
   doc.setTextColor(0, 83, 91);
-  doc.text("Ri7la — E-ticket", margin, y);
+  doc.text("Saafir — E-ticket", margin, y);
   y += 10;
 
   doc.setFontSize(10);
@@ -253,7 +253,7 @@ export async function downloadTicketPdf(
   y += 54;
   doc.setFontSize(8);
   doc.setTextColor(120, 120, 120);
-  doc.text(doc.splitTextToSize("Show this QR at boarding. Ri7la MVP demo.", textW), margin, y);
+  doc.text(doc.splitTextToSize("Show this QR at boarding. Saafir MVP demo.", textW), margin, y);
   if (b.originDetail || b.pickupDetail) {
     y += 8;
     doc.text(doc.splitTextToSize(`From: ${b.originDetail ?? b.pickupDetail ?? ""}`, textW), margin, y);
@@ -264,7 +264,7 @@ export async function downloadTicketPdf(
   }
 
   const ref = b.referenceCode.replace(/\s+/g, "-");
-  const name = fileBaseName ?? `ri7la-billet-${ref}`;
+  const name = fileBaseName ?? `saafir-billet-${ref}`;
   doc.save(`${name}.pdf`);
 }
 

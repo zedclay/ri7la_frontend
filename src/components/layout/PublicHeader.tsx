@@ -183,7 +183,7 @@ export function PublicHeader() {
   const rawPathname = usePathname();
   const pathname = rawPathname.replace(/^\/(fr|ar)(?=\/|$)/, "") || "/";
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [role, setRole] = useState<AppRole | null>(null);
+  const [role, setRole] = useState<AppRole | null | undefined>(() => (getAuthTokens() ? undefined : null));
   const [me, setMe] = useState<{ fullName?: string | null; phoneE164?: string | null } | null>(null);
 
   useEffect(() => {
@@ -210,6 +210,7 @@ export function PublicHeader() {
         setMe(null);
         return;
       }
+      setRole(undefined);
       try {
         const res = await fetchUserMeClientCached();
         if (cancelled) return;
@@ -232,13 +233,15 @@ export function PublicHeader() {
 
     const handler = () => void load();
     window.addEventListener("storage", handler);
-    window.addEventListener("ri7la_auth", handler);
+    window.addEventListener("saafir_auth", handler);
+    window.addEventListener("saafir_auth", handler);
     void load();
 
     return () => {
       cancelled = true;
       window.removeEventListener("storage", handler);
-      window.removeEventListener("ri7la_auth", handler);
+      window.removeEventListener("saafir_auth", handler);
+      window.removeEventListener("saafir_auth", handler);
     };
   }, []);
 
@@ -285,7 +288,7 @@ export function PublicHeader() {
   const rightControls = useMemo(() => {
     const lang = <LocaleSwitcher variant="header" />;
 
-    if (!role) {
+    if (role === null) {
       return (
         <div className="flex flex-col gap-3">
           {lang}
@@ -305,6 +308,10 @@ export function PublicHeader() {
           </div>
         </div>
       );
+    }
+
+    if (role === undefined) {
+      return <div className="flex flex-col gap-3">{lang}</div>;
     }
 
     if (role === "admin") {
@@ -380,8 +387,9 @@ export function PublicHeader() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex h-[72px] items-center justify-between gap-12">
             <div className="flex items-center gap-3">
-              <Link href="/" className="text-2xl font-extrabold tracking-tight text-primary-container">
-                Ri7la
+              <Link href="/" className="flex items-center gap-2 text-primary-container">
+                <img src="/saafir-icon.svg" alt="" className="h-8 w-8" />
+                <img src="/saafir-wordmark.svg" alt="Saafir" className="h-6 w-auto" />
               </Link>
             </div>
 
@@ -409,7 +417,7 @@ export function PublicHeader() {
               <div className="hidden items-center gap-5 md:flex">
                 <LocaleSwitcher variant="header" />
 
-                {!role ? (
+                {role === null ? (
                   <>
                     <Link
                       href="/auth/login"
@@ -424,7 +432,7 @@ export function PublicHeader() {
                       {t("signUp")}
                     </Link>
                   </>
-                ) : role === "passenger" ? (
+                ) : role === undefined ? null : role === "passenger" ? (
                   <>
                     <Link
                       href="/passenger/become-driver"

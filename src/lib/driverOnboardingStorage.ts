@@ -34,8 +34,8 @@ export type DriverOnboardingState = {
   vehicle: DriverVehicleDraft;
 };
 
-const KEY_LEGACY_VEHICLE = (userId: string) => `ri7la_driver_vehicle_draft_${userId}`;
-const KEY_V2 = (userId: string) => `ri7la_driver_onboarding_v2_${userId}`;
+const KEY_LEGACY_VEHICLE = (userId: string) => `saafir_driver_vehicle_draft_${userId}`;
+const KEY_V2 = (userId: string) => `saafir_driver_onboarding_v2_${userId}`;
 
 /** Read `sub` from JWT payload (storage key only; not a security check). */
 export function getJwtSubject(accessToken: string | null | undefined): string | null {

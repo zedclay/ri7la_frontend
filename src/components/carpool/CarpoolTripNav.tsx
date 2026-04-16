@@ -12,9 +12,10 @@ export function CarpoolTripNav() {
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         <Link
           href="/"
-          className="font-headline text-2xl font-bold tracking-tighter text-primary-container"
+          className="flex items-center gap-2 text-primary-container"
         >
-          Ri7la
+          <img src="/saafir-icon.svg" alt="" className="h-8 w-8" />
+          <img src="/saafir-wordmark.svg" alt="Saafir" className="h-6 w-auto" />
         </Link>
         <nav className="hidden items-center gap-8 font-headline font-semibold tracking-tight md:flex">
           {links.map((l) => (

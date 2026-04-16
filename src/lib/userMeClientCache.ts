@@ -38,7 +38,7 @@ export function invalidateUserMeClientCache(): void {
 }
 
 if (typeof window !== "undefined") {
-  window.addEventListener("ri7la_auth", () => invalidateUserMeClientCache());
+  window.addEventListener("saafir_auth", () => invalidateUserMeClientCache());
 }
 
 export async function fetchUserMeClientCached(): Promise<UserMeClientPayload | null> {

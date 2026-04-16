@@ -5,8 +5,8 @@ import { PublicHeader } from "@/components/layout/PublicHeader";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
 export const metadata: Metadata = {
-  title: "Presse — Ri7la",
-  description: "Ressources presse et contact média pour Ri7la.",
+  title: "Presse — Saafir",
+  description: "Ressources presse et contact média pour Saafir.",
 };
 
 export default function PressPage() {
@@ -60,4 +60,3 @@ export default function PressPage() {
     </div>
   );
 }
-

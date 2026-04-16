@@ -36,8 +36,9 @@ export function SignUpView() {
           </div>
           <div className="relative z-10 max-w-xl text-white">
             <div className="mb-12">
-              <Link href="/" className="mb-8 block font-headline text-3xl font-extrabold tracking-tight text-white">
-                Ri7la
+              <Link href="/" className="mb-8 flex w-fit items-center gap-2 text-white">
+                <img src="/saafir-icon.svg" alt="" className="h-10 w-10" />
+                <img src="/saafir-wordmark.svg" alt="Saafir" className="h-8 w-auto" />
               </Link>
               <h1 className="mb-6 font-headline text-4xl font-bold leading-tight md:text-5xl">
                 Rejoignez la révolution du voyage en Algérie.
@@ -81,8 +82,9 @@ export function SignUpView() {
         <section className="flex w-full items-center justify-center bg-surface p-6 md:w-1/2 md:p-16">
           <div className="w-full max-w-md">
             <div className="mb-8 md:hidden">
-              <Link href="/" className="font-headline text-2xl font-bold text-primary">
-                Ri7la
+              <Link href="/" className="flex w-fit items-center gap-2 text-primary">
+                <img src="/saafir-icon.svg" alt="" className="h-9 w-9" />
+                <img src="/saafir-wordmark.svg" alt="Saafir" className="h-7 w-auto" />
               </Link>
             </div>
             <div className="mb-10">

@@ -20,10 +20,10 @@ export function DriverDashboardVerificationCard() {
       if (!cancelled) setMe(m);
     });
     const onAuth = () => setMe(null);
-    window.addEventListener("ri7la_auth", onAuth);
+    window.addEventListener("saafir_auth", onAuth);
     return () => {
       cancelled = true;
-      window.removeEventListener("ri7la_auth", onAuth);
+      window.removeEventListener("saafir_auth", onAuth);
     };
   }, []);
 

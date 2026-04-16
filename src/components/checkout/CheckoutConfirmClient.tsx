@@ -109,7 +109,7 @@ export function CheckoutConfirmClient({ bookingId, booking }: { bookingId: strin
       });
       try {
         saveConfirmedSnapshot(snapshot);
-        sessionStorage.setItem(`ri7la_success_passenger_${bookingId}`, passenger.fullName);
+        sessionStorage.setItem(`saafir_success_passenger_${bookingId}`, passenger.fullName);
       } catch {
         /* ignore */
       }

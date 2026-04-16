@@ -4,9 +4,9 @@ import { PublicFooter } from "@/components/layout/PublicFooter";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 
 export const metadata: Metadata = {
-  title: "Politique de Remboursement — Ri7la",
+  title: "Politique de Remboursement — Saafir",
   description:
-    "Politique de remboursement Ri7la (MVP) : annulation, frais, délais, et support.",
+    "Politique de remboursement Saafir (MVP) : annulation, frais, délais, et support.",
 };
 
 export default function RefundsPage() {
@@ -62,4 +62,3 @@ export default function RefundsPage() {
     </div>
   );
 }
-

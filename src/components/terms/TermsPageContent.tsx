@@ -16,7 +16,7 @@ export function TermsPageContent() {
           Conditions Générales d&apos;Utilisation
         </h1>
         <p className="max-w-2xl text-lg leading-relaxed text-on-surface-variant">
-          Bienvenue sur Ri7la. Ces conditions régissent votre utilisation de notre plateforme de
+          Bienvenue sur Saafir. Ces conditions régissent votre utilisation de notre plateforme de
           voyage. En accédant à nos services, vous acceptez ces termes dans leur intégralité.
         </p>
       </header>
@@ -31,7 +31,7 @@ export function TermsPageContent() {
               Note sur la Confiance et la Sécurité
             </h3>
             <p className="font-medium leading-relaxed text-on-primary-container/90">
-              Notre priorité absolue est votre sécurité. Chaque trajet sur Ri7la est conçu pour
+              Notre priorité absolue est votre sécurité. Chaque trajet sur Saafir est conçu pour
               offrir une expérience transparente, sécurisée et fiable. Nous nous engageons à
               protéger vos données et à assurer une qualité de service irréprochable auprès de tous
               nos partenaires de transport.
@@ -61,13 +61,13 @@ export function TermsPageContent() {
             <div className="max-w-none space-y-4 leading-relaxed text-on-surface-variant">
               <p>
                 Les présentes Conditions Générales d&apos;Utilisation (les &quot;Conditions&quot;)
-                s&apos;appliquent à l&apos;ensemble des services proposés par Ri7la Technologies,
-                y compris via notre site web et nos applications mobiles. En utilisant Ri7la, vous
+                s&apos;appliquent à l&apos;ensemble des services proposés par Saafir Technologies,
+                y compris via notre site web et nos applications mobiles. En utilisant Saafir, vous
                 reconnaissez avoir pris connaissance de ces conditions et vous engagez à les
                 respecter.
               </p>
               <p>
-                Ri7la agit en tant que plateforme de mise en relation entre des voyageurs et des
+                Saafir agit en tant que plateforme de mise en relation entre des voyageurs et des
                 prestataires de transport. Nous ne sommes pas nous-mêmes un transporteur, mais un
                 facilitateur technologique.
               </p>
@@ -87,7 +87,7 @@ export function TermsPageContent() {
                   <h4 className="mb-1 font-bold text-on-surface">Âge Minimum</h4>
                   <p className="text-sm text-on-surface-variant">
                     Vous devez être âgé d&apos;au moins 18 ans pour créer un compte et effectuer des
-                    réservations sur la plateforme Ri7la.
+                    réservations sur la plateforme Saafir.
                   </p>
                 </div>
               </div>
@@ -186,7 +186,7 @@ export function TermsPageContent() {
                 <span className="absolute -left-[calc(0.5rem+9px)] top-1.5 h-4 w-4 rounded-full bg-primary-container" />
                 <h4 className="mb-2 font-bold text-primary">Entre 24h et 6h avant le départ</h4>
                 <p className="text-on-surface-variant">
-                  Remboursement partiel (50%) ou crédit de voyage sur votre compte Ri7la.
+                  Remboursement partiel (50%) ou crédit de voyage sur votre compte Saafir.
                 </p>
               </div>
               <div className="relative">
@@ -204,7 +204,7 @@ export function TermsPageContent() {
               6. Limitation de Responsabilité
             </h2>
             <div className="rounded-2xl bg-surface-container p-8 italic leading-loose text-on-surface-variant">
-              &quot;Ri7la Technologies ne pourra être tenue responsable des dommages indirects,
+              &quot;Saafir Technologies ne pourra être tenue responsable des dommages indirects,
               y compris les pertes de profits, résultant de l&apos;utilisation de nos services.
               Bien que nous fassions tout notre possible pour assurer la ponctualité de nos
               partenaires, nous ne garantissons pas l&apos;absence de retards dus à des

@@ -1,7 +1,10 @@
 import { getAccessToken } from "@/lib/auth";
 
 export function apiBaseUrl() {
-  return process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:4000";
+  const configured = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+  if (configured) return configured.replace(/\/+$/, "");
+  if (typeof window !== "undefined") return "";
+  return "http://127.0.0.1:4000";
 }
 
 /** Parses Nest `HttpExceptionFilter` JSON: `{ success: false, error: { message } }` */

@@ -10,8 +10,8 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { departureId } = await params;
   return {
-    title: `Bus trip — Ri7la`,
-    description: `Bus departure ${departureId}. Select seats and book on Ri7la.`,
+    title: `Bus trip — Saafir`,
+    description: `Bus departure ${departureId}. Select seats and book on Saafir.`,
   };
 }
 

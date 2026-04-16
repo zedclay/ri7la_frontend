@@ -5,7 +5,7 @@ export type PassengerIdentityState = {
   identityDocumentFileNames: string[];
 };
 
-const KEY = (userId: string) => `ri7la_passenger_identity_v1_${userId}`;
+const KEY = (userId: string) => `saafir_passenger_identity_v1_${userId}`;
 
 export function currentUserIdForStorage(): string | null {
   return getJwtSubject(getAccessToken());

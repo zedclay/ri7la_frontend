@@ -24,12 +24,12 @@ export type DemoUser = {
   carImageUrls?: string[];
 };
 
-const KEY_SESSION = "ri7la_demo_session_v1";
-const KEY_USERS = "ri7la_demo_users_v1";
+const KEY_SESSION = "saafir_demo_session_v1";
+const KEY_USERS = "saafir_demo_users_v1";
 
 function notify() {
   try {
-    window.dispatchEvent(new Event("ri7la_demo_session"));
+    window.dispatchEvent(new Event("saafir_demo_session"));
   } catch {
     return;
   }

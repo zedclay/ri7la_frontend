@@ -6,8 +6,8 @@ import { mockReviews } from "@/lib/mockData";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
 export const metadata: Metadata = {
-  title: "Avis — Ri7la",
-  description: "Avis et retours des voyageurs Ri7la (MVP).",
+  title: "Avis — Saafir",
+  description: "Avis et retours des voyageurs Saafir (MVP).",
 };
 
 function Stars({ rating }: { rating: number }) {

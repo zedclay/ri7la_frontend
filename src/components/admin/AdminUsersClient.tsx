@@ -150,7 +150,7 @@ export function AdminUsersClient() {
       const msg = e instanceof Error ? e.message : "Failed to load users";
       setError(
         isForbiddenMessage(msg)
-          ? `${msg} — Use an account with the ADMIN role (after seed: admin@ri7la.dz / Ri7la1234). Re-login after roles change.`
+          ? `${msg} — Use an account with the ADMIN role (after seed: admin@saafir.dz / Saafir1234). Re-login after roles change.`
           : msg
       );
       setData(null);

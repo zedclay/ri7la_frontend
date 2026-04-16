@@ -99,7 +99,7 @@ export function DriverCreateTripForm() {
     if (v?.vehicleLine?.trim()) {
       const { carMake, carModel } = splitMakeModel(v.vehicleLine);
       return {
-        carMake: carMake || "Ri7la",
+        carMake: carMake || "Saafir",
         carModel: carModel || "Vehicle",
         carColor: v.colorPreset === "other" ? v.colorCustom.trim() || undefined : undefined,
         plateNumber: plateFromVehicle(v) || undefined,
@@ -110,7 +110,7 @@ export function DriverCreateTripForm() {
       };
     }
     return {
-      carMake: "Ri7la",
+      carMake: "Saafir",
       carModel: "Vehicle",
       luggagePolicy,
       smokingAllowed,

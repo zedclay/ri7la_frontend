@@ -3,7 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
 export const metadata: Metadata = {
-  title: "Réinitialiser le mot de passe — Ri7la",
+  title: "Réinitialiser le mot de passe — Saafir",
   description: "Entrez le code de vérification et définissez un nouveau mot de passe.",
 };
 
@@ -27,8 +27,9 @@ export default function ResetPasswordPage() {
   return (
     <div className="flex min-h-screen flex-col bg-surface">
       <header className="flex items-center justify-between px-6 py-5">
-        <Link href="/" className="font-headline text-lg font-extrabold tracking-tight text-primary-container">
-          Ri7la
+        <Link href="/" className="flex items-center gap-2 text-primary-container">
+          <img src="/saafir-icon.svg" alt="" className="h-7 w-7" />
+          <img src="/saafir-wordmark.svg" alt="Saafir" className="h-5 w-auto" />
         </Link>
         <Link href="/help" className="text-sm font-semibold text-on-surface-variant hover:text-primary">
           Aide
@@ -116,16 +117,18 @@ export default function ResetPasswordPage() {
 
       <footer className="border-t border-outline-variant/10 bg-surface-container-low px-6 py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-xs text-on-surface-variant md:flex-row">
-          <div className="font-headline font-bold text-primary-container">Ri7la</div>
+          <div className="flex items-center gap-2">
+            <img src="/saafir-icon.svg" alt="" className="h-7 w-7" />
+            <img src="/saafir-wordmark.svg" alt="Saafir" className="h-5 w-auto" />
+          </div>
           <div className="flex flex-wrap justify-center gap-6">
             <Link href="/privacy" className="hover:text-primary">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-primary">Terms of Service</Link>
             <Link href="/help" className="hover:text-primary">Help Center</Link>
           </div>
-          <div>© {new Date().getFullYear()} Ri7la. All rights reserved.</div>
+          <div>© {new Date().getFullYear()} Saafir. All rights reserved.</div>
         </div>
       </footer>
     </div>
   );
 }
-
