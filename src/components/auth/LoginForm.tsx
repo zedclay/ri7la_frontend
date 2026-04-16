@@ -14,6 +14,17 @@ type Props = {
   fixedRole?: "admin";
 };
 
+function toAlgeriaE164(input: string) {
+  const digits = input.replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("213")) return `+${digits}`;
+  if (digits.startsWith("0") && digits.length === 10) return `+213${digits.slice(1)}`;
+  if ((digits.startsWith("5") || digits.startsWith("6") || digits.startsWith("7")) && digits.length === 9) {
+    return `+213${digits}`;
+  }
+  return input.trim();
+}
+
 function dashboardForRole(role: "passenger" | "driver" | "admin") {
   if (role === "driver") return "/driver";
   if (role === "admin") return "/admin";
@@ -89,7 +100,7 @@ export function LoginForm({ showError = false, fixedRole }: Props) {
           e.preventDefault();
           setError(null);
           const next = searchParams.get("next") || undefined;
-          const value = identifier.trim();
+          const value = fixedRole ? identifier.trim() : toAlgeriaE164(identifier);
           try {
             const res = await apiPostJsonData<{
               user: { roles: string[] };
@@ -122,24 +133,43 @@ export function LoginForm({ showError = false, fixedRole }: Props) {
           <label htmlFor="identifier" className="ms-1 text-sm font-semibold text-on-surface">
             {fixedRole ? t("email") : t("phoneNumber")}
           </label>
-          <div className="group relative">
-            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-4">
-              <MaterialIcon
-                name="person"
-                className="!text-xl text-outline transition-colors group-focus-within:text-primary"
+          {fixedRole ? (
+            <div className="group relative">
+              <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-4">
+                <MaterialIcon
+                  name="person"
+                  className="!text-xl text-outline transition-colors group-focus-within:text-primary"
+                />
+              </div>
+              <input
+                id="identifier"
+                name="identifier"
+                type="text"
+                autoComplete="username"
+                placeholder={t("emailPlaceholder")}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                className="block w-full rounded-xl border-none bg-surface-container-low py-3.5 ps-11 pe-4 text-on-surface outline-none transition-all placeholder:text-outline focus:ring-2 focus:ring-primary"
               />
             </div>
-            <input
-              id="identifier"
-              name="identifier"
-              type="text"
-              autoComplete={fixedRole ? "username" : "tel"}
-              placeholder={fixedRole ? t("emailPlaceholder") : t("phonePlaceholder")}
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              className="block w-full rounded-xl border-none bg-surface-container-low py-3.5 ps-11 pe-4 text-on-surface outline-none transition-all placeholder:text-outline focus:ring-2 focus:ring-primary"
-            />
-          </div>
+          ) : (
+            <div className="flex items-center overflow-hidden rounded-xl bg-surface-container-low ring-0 focus-within:ring-2 focus-within:ring-primary">
+              <span className="inline-flex h-full items-center px-4 text-sm font-semibold text-on-surface-variant">
+                +213
+              </span>
+              <input
+                id="identifier"
+                name="identifier"
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel"
+                placeholder="5XXXXXXXX"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                className="block w-full border-none bg-transparent py-3.5 pe-4 text-on-surface outline-none placeholder:text-outline"
+              />
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">

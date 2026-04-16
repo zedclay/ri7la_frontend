@@ -7,6 +7,17 @@ import { useTranslations } from "next-intl";
 import { apiPostJsonData } from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
 
+function toAlgeriaE164(input: string) {
+  const digits = input.replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("213")) return `+${digits}`;
+  if (digits.startsWith("0") && digits.length === 10) return `+213${digits.slice(1)}`;
+  if ((digits.startsWith("5") || digits.startsWith("6") || digits.startsWith("7")) && digits.length === 9) {
+    return `+213${digits}`;
+  }
+  return input.trim();
+}
+
 export function ForgotPasswordForm() {
   const t = useTranslations("common");
   const router = useRouter();
@@ -20,7 +31,7 @@ export function ForgotPasswordForm() {
       onSubmit={async (e) => {
         e.preventDefault();
         setError(null);
-        const value = phone.trim();
+        const value = toAlgeriaE164(phone);
         if (!value) return;
         setLoading(true);
         try {
@@ -49,15 +60,19 @@ export function ForgotPasswordForm() {
         <label htmlFor="phone" className="mb-2 block text-sm font-semibold text-on-surface">
           {t("phoneNumber")}
         </label>
-        <input
-          id="phone"
-          type="tel"
-          autoComplete="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder={t("phonePlaceholder")}
-          className="w-full rounded-xl border border-outline-variant/40 bg-surface px-4 py-3 text-base text-on-surface outline-none focus:ring-2 focus:ring-primary"
-        />
+        <div className="flex items-center overflow-hidden rounded-xl border border-outline-variant/40 bg-surface ring-0 focus-within:ring-2 focus-within:ring-primary">
+          <span className="inline-flex h-full items-center px-4 text-sm font-semibold text-on-surface-variant">+213</span>
+          <input
+            id="phone"
+            type="tel"
+            inputMode="numeric"
+            autoComplete="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="5XXXXXXXX"
+            className="w-full border-none bg-transparent py-3 text-base text-on-surface outline-none placeholder:text-outline"
+          />
+        </div>
       </div>
 
       <button
