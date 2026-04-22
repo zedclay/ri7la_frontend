@@ -242,13 +242,6 @@ export function LoginForm({ showError = false, fixedRole }: Props) {
               <MaterialIcon name="arrow_forward" className="!text-sm rtl:rotate-180" />
             </Link>
           </div>
-
-          <div className="text-center text-xs text-on-surface-variant">
-            <span className="font-semibold">{t("adminQuestion")}</span>{" "}
-            <Link href="/meadmin" className="font-bold text-primary underline underline-offset-4">
-              {t("adminLoginLink")}
-            </Link>{" "}
-          </div>
         </>
       )}
     </div>
