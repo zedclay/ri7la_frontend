@@ -4,13 +4,13 @@ import { getTranslations } from "next-intl/server";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
 const IMG_CARPOOL =
-  "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1400&q=80";
+  "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1400&q=80";
 
 const IMG_BUS =
-  "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1400&q=80";
+  "https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?auto=format&fit=crop&w=1400&q=80";
 
 const IMG_TRAIN =
-  "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1400&q=80";
+  "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1400&q=80";
 
 export async function TravelModes() {
   const t = await getTranslations("common");
