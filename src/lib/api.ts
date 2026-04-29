@@ -45,6 +45,47 @@ function unwrapData<T>(raw: unknown): T {
   throw new Error("Unexpected API response (expected { success: true, data })");
 }
 
+let refreshInFlight: Promise<boolean> | null = null;
+
+async function refreshSession(): Promise<boolean> {
+  if (typeof window === "undefined") return false;
+  if (refreshInFlight) return refreshInFlight;
+
+  refreshInFlight = (async () => {
+    const url = `${apiBaseUrl()}/api/auth/refresh`;
+    const res = await fetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    }).catch(() => null);
+
+    return !!res && res.ok;
+  })().finally(() => {
+    refreshInFlight = null;
+  });
+
+  return refreshInFlight;
+}
+
+async function fetchWithRefresh(url: string, init: RequestInit & { method: string }) {
+  const res = await fetch(url, init);
+  if (res.status !== 401) return res;
+
+  const p = new URL(url).pathname;
+  if (p.endsWith("/api/auth/refresh") || p.endsWith("/api/auth/login") || p.endsWith("/api/auth/logout")) {
+    return res;
+  }
+
+  const ok = await refreshSession();
+  if (!ok) return res;
+
+  return fetch(url, init);
+}
+
 /** POST and return the nested `data` payload (Nest `ResponseTransformInterceptor`). */
 export async function apiPostJsonData<T>(path: string, body: unknown, init?: RequestInit): Promise<T> {
   const raw = await apiPostJson<unknown>(path, body, init);
@@ -54,7 +95,7 @@ export async function apiPostJsonData<T>(path: string, body: unknown, init?: Req
 export async function apiPatchJson<T>(path: string, body: unknown, init?: RequestInit): Promise<T> {
   const url = `${apiBaseUrl()}${path.startsWith("/") ? "" : "/"}${path}`;
   const initHeaders = normalizeHeaders(init);
-  const res = await fetch(url, {
+  const res = await fetchWithRefresh(url, {
     ...init,
     method: "PATCH",
     credentials: "include",
@@ -92,7 +133,7 @@ function normalizeHeaders(init?: RequestInit): Record<string, string> {
 export async function apiGetJson<T>(path: string, init?: RequestInit): Promise<T> {
   const url = `${apiBaseUrl()}${path.startsWith("/") ? "" : "/"}${path}`;
   const initHeaders = normalizeHeaders(init);
-  const res = await fetch(url, {
+  const res = await fetchWithRefresh(url, {
     ...init,
     method: "GET",
     credentials: "include",
@@ -111,7 +152,7 @@ export async function apiGetJson<T>(path: string, init?: RequestInit): Promise<T
 export async function apiPostJson<T>(path: string, body: unknown, init?: RequestInit): Promise<T> {
   const url = `${apiBaseUrl()}${path.startsWith("/") ? "" : "/"}${path}`;
   const initHeaders = normalizeHeaders(init);
-  const res = await fetch(url, {
+  const res = await fetchWithRefresh(url, {
     ...init,
     method: "POST",
     credentials: "include",
