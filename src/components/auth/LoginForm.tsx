@@ -7,7 +7,8 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { apiGetJsonData, apiPostJsonData } from "@/lib/api";
-import { clearAuth, getAuthTokens, setAuthTokens } from "@/lib/auth";
+import { clearAuth } from "@/lib/auth";
+import { invalidateUserMeClientCache } from "@/lib/userMeClientCache";
 
 type Props = {
   showError?: boolean;
@@ -41,8 +42,6 @@ export function LoginForm({ showError = false, fixedRole }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const existing = getAuthTokens();
-    if (!existing) return;
     let cancelled = false;
     async function load() {
       try {
@@ -113,7 +112,10 @@ export function LoginForm({ showError = false, fixedRole }: Props) {
               return;
             }
 
-            setAuthTokens(res.tokens);
+            invalidateUserMeClientCache();
+            try {
+              window.dispatchEvent(new Event("saafir_auth"));
+            } catch {}
 
             if (res.user.roles.includes("ADMIN")) {
               router.push(dashboardForRole("admin"));

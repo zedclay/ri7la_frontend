@@ -2,7 +2,6 @@
 
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useEffect } from "react";
-import { getAuthTokens } from "@/lib/auth";
 import { fetchUserMeClientCached } from "@/lib/userMeClientCache";
 
 type AppRole = "passenger" | "driver" | "admin";
@@ -32,18 +31,16 @@ export function RequireDemoRole({
   const pathname = usePathname();
 
   useEffect(() => {
-    const tokens = getAuthTokens();
-    if (!tokens) {
-      const next = pathname || "/";
-      router.replace(`/auth/login?next=${encodeURIComponent(next)}`);
-      return;
-    }
     let cancelled = false;
     async function check() {
       try {
         const res = await fetchUserMeClientCached();
         if (cancelled) return;
-        if (!res) return;
+        if (!res) {
+          const next = pathname || "/";
+          router.replace(`/auth/login?next=${encodeURIComponent(next)}`);
+          return;
+        }
         const myRole = roleFromBackend(res.roles);
         if (myRole !== role) {
           router.replace(dashboardForRole(myRole));

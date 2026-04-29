@@ -1,10 +1,13 @@
-import { getAccessToken } from "@/lib/auth";
-
 export function apiBaseUrl() {
+  const internal = process.env.API_INTERNAL_BASE_URL?.trim();
   const configured = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+  if (typeof window === "undefined") {
+    if (internal) return internal.replace(/\/+$/, "");
+    if (configured) return configured.replace(/\/+$/, "");
+    return "http://127.0.0.1:4000";
+  }
   if (configured) return configured.replace(/\/+$/, "");
-  if (typeof window !== "undefined") return "";
-  return "http://127.0.0.1:4000";
+  return "";
 }
 
 /** Parses Nest `HttpExceptionFilter` JSON: `{ success: false, error: { message } }` */
@@ -54,10 +57,10 @@ export async function apiPatchJson<T>(path: string, body: unknown, init?: Reques
   const res = await fetch(url, {
     ...init,
     method: "PATCH",
+    credentials: "include",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
-      ...authHeaders(),
       ...initHeaders,
     },
     body: JSON.stringify(body),
@@ -80,13 +83,6 @@ export async function apiGetJsonData<T>(path: string, init?: RequestInit): Promi
   return unwrapData<T>(raw);
 }
 
-function authHeaders(): Record<string, string> {
-  if (typeof window === "undefined") return {};
-  const token = getAccessToken();
-  if (!token) return {};
-  return { Authorization: `Bearer ${token}` };
-}
-
 function normalizeHeaders(init?: RequestInit): Record<string, string> {
   if (!init?.headers) return {};
   const h = new Headers(init.headers);
@@ -99,9 +95,9 @@ export async function apiGetJson<T>(path: string, init?: RequestInit): Promise<T
   const res = await fetch(url, {
     ...init,
     method: "GET",
+    credentials: "include",
     headers: {
       Accept: "application/json",
-      ...authHeaders(),
       ...initHeaders,
     },
   });
@@ -118,10 +114,10 @@ export async function apiPostJson<T>(path: string, body: unknown, init?: Request
   const res = await fetch(url, {
     ...init,
     method: "POST",
+    credentials: "include",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
-      ...authHeaders(),
       ...initHeaders,
     },
     body: JSON.stringify(body),

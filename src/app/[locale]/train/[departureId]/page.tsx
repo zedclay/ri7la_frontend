@@ -53,7 +53,8 @@ function trainClass(busType: string | null | undefined): "Standard" | "First" {
 
 export default async function TrainDeparturePage({ params }: Props) {
   const { departureId } = await params;
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:4000";
+  const base =
+    process.env.API_INTERNAL_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:4000";
   const res = await fetch(`${base}/api/trips/${departureId}`, { cache: "no-store" });
   if (!res.ok) return notFound();
 

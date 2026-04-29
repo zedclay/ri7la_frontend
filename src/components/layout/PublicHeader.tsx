@@ -5,7 +5,8 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
-import { clearAuth, getAuthTokens } from "@/lib/auth";
+import { clearAuth } from "@/lib/auth";
+import { apiPostJson } from "@/lib/api";
 import { fetchUserMeClientCached } from "@/lib/userMeClientCache";
 
 type LinkHref = React.ComponentProps<typeof Link>["href"];
@@ -183,7 +184,7 @@ export function PublicHeader() {
   const rawPathname = usePathname();
   const pathname = rawPathname.replace(/^\/(fr|ar)(?=\/|$)/, "") || "/";
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [role, setRole] = useState<AppRole | null | undefined>(() => (getAuthTokens() ? undefined : null));
+  const [role, setRole] = useState<AppRole | null | undefined>(() => undefined);
   const [me, setMe] = useState<{ fullName?: string | null; phoneE164?: string | null } | null>(null);
 
   useEffect(() => {
@@ -204,12 +205,6 @@ export function PublicHeader() {
     let cancelled = false;
 
     async function load() {
-      const tokens = getAuthTokens();
-      if (!tokens) {
-        setRole(null);
-        setMe(null);
-        return;
-      }
       setRole(undefined);
       try {
         const res = await fetchUserMeClientCached();
@@ -234,13 +229,11 @@ export function PublicHeader() {
     const handler = () => void load();
     window.addEventListener("storage", handler);
     window.addEventListener("saafir_auth", handler);
-    window.addEventListener("saafir_auth", handler);
     void load();
 
     return () => {
       cancelled = true;
       window.removeEventListener("storage", handler);
-      window.removeEventListener("saafir_auth", handler);
       window.removeEventListener("saafir_auth", handler);
     };
   }, []);
@@ -329,6 +322,7 @@ export function PublicHeader() {
               type="button"
               className="rounded-full px-4 py-2 text-sm font-extrabold text-error"
               onClick={() => {
+                void apiPostJson("/api/auth/logout", {});
                 clearAuth();
                 router.push("/auth/login");
               }}
@@ -444,6 +438,7 @@ export function PublicHeader() {
                       role="passenger"
                       avatar={me}
                       onLogout={() => {
+                        void apiPostJson("/api/auth/logout", {});
                         clearAuth();
                         router.push("/auth/login");
                       }}
@@ -461,6 +456,7 @@ export function PublicHeader() {
                       role="driver"
                       avatar={me}
                       onLogout={() => {
+                        void apiPostJson("/api/auth/logout", {});
                         clearAuth();
                         router.push("/auth/login");
                       }}
@@ -478,6 +474,7 @@ export function PublicHeader() {
                       type="button"
                       className="inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-extrabold text-error transition-colors hover:bg-error-container/30 hover:text-error/80"
                       onClick={() => {
+                        void apiPostJson("/api/auth/logout", {});
                         clearAuth();
                         router.push("/auth/login");
                       }}

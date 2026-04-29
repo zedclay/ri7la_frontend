@@ -19,7 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CarpoolTripPage({ params }: Props) {
   const { tripId } = await params;
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:4000";
+  const base =
+    process.env.API_INTERNAL_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:4000";
   const res = await fetch(`${base}/api/trips/${tripId}`, { cache: "no-store" });
   if (!res.ok) {
     return (

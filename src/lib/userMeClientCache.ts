@@ -1,5 +1,4 @@
 import { apiGetJsonData } from "@/lib/api";
-import { getAccessToken } from "@/lib/auth";
 
 /**
  * Cached GET /api/users/me for client components (header, guards).
@@ -25,12 +24,7 @@ export type UserMeClientPayload = {
 const TTL_MS = 45_000;
 
 let cache: { sig: string; at: number; data: UserMeClientPayload } | null = null;
-let inflight: Promise<UserMeClientPayload> | null = null;
-
-function accessTokenSig(): string | null {
-  const t = getAccessToken();
-  return t ? t.slice(0, 32) : null;
-}
+let inflight: Promise<UserMeClientPayload | null> | null = null;
 
 export function invalidateUserMeClientCache(): void {
   cache = null;
@@ -42,8 +36,7 @@ if (typeof window !== "undefined") {
 }
 
 export async function fetchUserMeClientCached(): Promise<UserMeClientPayload | null> {
-  const sig = accessTokenSig();
-  if (!sig) return null;
+  const sig = "cookie";
 
   const now = Date.now();
   if (cache && cache.sig === sig && now - cache.at < TTL_MS) {
@@ -59,6 +52,7 @@ export async function fetchUserMeClientCached(): Promise<UserMeClientPayload | n
       cache = { sig, at: Date.now(), data };
       return data;
     })
+    .catch(() => null)
     .finally(() => {
       inflight = null;
     });

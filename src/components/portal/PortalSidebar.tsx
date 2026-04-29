@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { clearAuth } from "@/lib/auth";
+import { apiPostJson } from "@/lib/api";
 import { clearDemoSession } from "@/lib/demoSession";
 import { invalidateUserMeClientCache } from "@/lib/userMeClientCache";
 
@@ -92,6 +93,7 @@ export function PortalSidebar({
             type="button"
             className="mt-2 flex w-full items-center gap-2 text-xs font-bold text-error"
             onClick={() => {
+              void apiPostJson("/api/auth/logout", {});
               clearAuth();
               invalidateUserMeClientCache();
               clearDemoSession();
